@@ -34,3 +34,23 @@ fn main() {
   }
 }
 ```
+
+## API Methods RoadMap
+
+- [x] Authentication
+- [ ] RAW API Call
+- [ ] Search
+  - [ ] Host
+  - [ ] Hosts
+  - [ ] Items
+  - [ ] Triggers
+  - [ ] Web-scenarios
+- [ ] Create
+    - [ ] Host
+    - [ ] Item
+    - [ ] Trigger
+    - [ ] Web-scenario
+
+## Limitations
+
+- API v6
