@@ -53,4 +53,4 @@ fn main() {
 
 ## Limitations
 
-- API v6
+- [API v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
