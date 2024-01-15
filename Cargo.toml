@@ -1,0 +1,21 @@
+[package]
+name = "zabbix-api"
+version = "0.1.0"
+authors = ["Eugene Lebedev <eugene.0x90@gmail.com>"]
+edition = "2021"
+description = "Zabbix API client"
+license = "MIT"
+homepage = "https://github.com/lebe-dev/zabbix-api-rs"
+repository = "https://github.com/lebe-dev/zabbix-api-rs"
+readme = "README.md"
+keywords = ["zabbix", "api"]
+categories = ["api-bindings"]
+
+[dependencies]
+thiserror = "1.0.56"
+
+serde = { version = "1.0.195", features = ["derive"] }
+
+reqwest = { version = "0.11.23", features = ["blocking", "json"] }
+
+log = "0.4.20"
