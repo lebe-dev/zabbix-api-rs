@@ -16,15 +16,21 @@ zabbix-api = "0.1.0"
 Then use:
 
 ```rust
-let http_client = Client::new();
+use reqwest::blocking::Client;
+use crate::client::v6::ZabbixApiV6Client;
+use crate::client::ZabbixApiClient;
 
-let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
+fn main() {
+  let http_client = Client::new();
 
-match client.get_auth_session("Admin", "zabbix") {
+  let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
+    
+  match client.get_auth_session("Admin", "zabbix") {
     Ok(session) => println!("session: {session}"),
     Err(e) => {
         error!("error: {}", e);
         panic!("unexpected error")
     }
+  }
 }
 ```
