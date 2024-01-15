@@ -7,8 +7,10 @@ Due to the extensive nature of the Zabbix API, I have been unable to allocate su
 
 Add `reqwest` dependency:
 
-```shell
+```toml
+[dependencies]
 reqwest = { version = "0.11.23", features = ["blocking", "json"] }
+zabbix-api = "0.1.0"
 ```
 
 Then use:
