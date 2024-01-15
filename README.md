@@ -5,7 +5,7 @@ Due to the extensive nature of the Zabbix API, I have been unable to allocate su
 
 ## Getting started
 
-Add `reqwest` dependency:
+Add dependencies:
 
 ```toml
 [dependencies]
