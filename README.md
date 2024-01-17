@@ -35,7 +35,7 @@ fn main() {
 }
 ```
 
-- You can make raw api calls. 
+- You can make [raw api calls](src/client/v6/mod.rs#L113).
 
 ## API Methods RoadMap
 
