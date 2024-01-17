@@ -13,6 +13,9 @@ pub mod v6;
 pub mod post;
 
 pub trait ZabbixApiClient {
+    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/apiinfo/version
+    fn get_api_info(&self) -> Result<String, ZabbixApiError>;
+
     fn get_auth_session(&self, login: &str, token: &str) -> Result<String, ZabbixApiError>;
 
     fn raw_api_call<P: Serialize, R: DeserializeOwned>(&self, session: &str, method: &str, params: &P) -> Result<ZabbixApiResponse<R>, ZabbixApiError>;

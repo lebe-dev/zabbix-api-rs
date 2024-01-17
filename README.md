@@ -39,6 +39,7 @@ fn main() {
 
 ## API Methods RoadMap
 
+- [x] Get API info
 - [x] Authentication
 - [x] RAW API Call
 - [ ] Search

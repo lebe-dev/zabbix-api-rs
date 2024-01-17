@@ -14,6 +14,8 @@ use crate::item::create::{CreateItemRequest, CreateItemResponse};
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
 use crate::webscenario::create::{CreateWebScenarioRequest, CreateWebScenarioResponse};
 
+const JSON_RPC_VERSION: &str = "2.0";
+
 pub struct ZabbixApiV6Client {
     client: Client,
     api_endpoint_url: String
@@ -29,14 +31,58 @@ impl ZabbixApiV6Client {
 }
 
 impl ZabbixApiClient for ZabbixApiV6Client {
+
+    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/apiinfo/version
+    fn get_api_info(&self) -> Result<String, ZabbixApiError> {
+        let request = ZabbixApiRequest {
+            jsonrpc: JSON_RPC_VERSION.to_string(),
+            method: "apiinfo.version".to_string(),
+            params: HashMap::<String,String>::new(),
+            id: 1,
+            auth: None,
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, request) {
+            Ok(response_body) => {
+                let response = serde_json::from_str::<ZabbixApiResponse<String>>(&response_body)?;
+
+                match response.result {
+                    Some(api_version) => {
+                        info!("zabbix api version: '{api_version}'");
+                        Ok(api_version)
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("auth error: {}", e);
+                Err(e)
+            }
+        }
+    }
+
+
     fn get_auth_session(&self,  login: &str, token: &str) -> Result<String, ZabbixApiError> {
+        info!("getting auth session for user '{login}'..");
+
         let params = HashMap::from([
             ("username".to_string(), login.to_string()),
             ("password".to_string(), token.to_string()),
         ]);
 
         let request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "user.login".to_string(),
             params,
             id: 1,
@@ -78,7 +124,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         info!("call api method '{method}'..");
 
         let request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: method.to_string(),
             params,
             id: 1,
@@ -123,7 +169,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         info!("creating host group '{}'..", request.name);
 
         let api_request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "hostgroup.create".to_string(),
             params: request,
             id: 1,
@@ -177,7 +223,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         info!("creating host '{}'..", request.host);
 
         let api_request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "host.create".to_string(),
             params: request,
             id: 1,
@@ -232,7 +278,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         info!("creating item with key '{}' for host id {}..", request.key_, request.host_id);
 
         let api_request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "item.create".to_string(),
             params: request,
             id: 1,
@@ -287,7 +333,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         info!("creating trigger '{}' with expression '{}'..", request.description, request.expression);
 
         let api_request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "trigger.create".to_string(),
             params: request,
             id: 1,
@@ -342,7 +388,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         info!("creating web-scenario '{}' for host id '{}'..", request.name, request.host_id);
 
         let api_request = ZabbixApiRequest {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "httptest.create".to_string(),
             params: request,
             id: 1,
@@ -412,6 +458,23 @@ mod tests {
     use crate::trigger::create::CreateTriggerRequest;
     use crate::webscenario::create::CreateWebScenarioRequest;
     use crate::webscenario::ZabbixWebScenarioStep;
+
+    #[test]
+    fn get_api_info() {
+        if are_integration_tests_enabled() {
+            let test_env = TestEnvBuilder::build();
+
+            match test_env.client.get_api_info() {
+                Ok(result) => {
+                    assert!(!result.is_empty())
+                }
+                Err(e) => {
+                    error!("error: {}", e);
+                    panic!("unexpected error")
+                }
+            }
+        }
+    }
 
     #[test]
     fn session_should_be_returned() {
