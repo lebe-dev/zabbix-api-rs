@@ -366,7 +366,10 @@ mod tests {
 
         if are_integration_tests_enabled() {
             let mut test_env = TestEnvBuilder::build();
-            test_env.get_session();
+
+            let group_name = get_random_string();
+
+            &test_env.get_session().create_host_group(&group_name);
 
             let group_name = get_random_string();
 
@@ -374,40 +377,26 @@ mod tests {
                 name: group_name,
             };
 
-            match &test_env.client.create_host_group(&test_env.session, &params) {
-                Ok(group_id) => {
-                    assert!(*group_id > 0);
+            let host = get_random_string();
 
-                    let host = get_random_string();
-
-                    let params = CreateHostRequest {
-                        host: host.to_string(),
-                        groups: vec![
-                            ZabbixHostGroup {
-                                group_id: group_id.to_string(),
-                            }
-                        ],
-                        interfaces: vec![],
-                        tags: vec![],
-                        templates: vec![],
-                        macros: vec![],
-                        inventory_mode: 0,
-                        inventory: HashMap::new(),
-                    };
-
-                    match test_env.client.create_host(&test_env.session, &params) {
-                        Ok(host_id) => {
-                            assert!(host_id > 0)
-                        }
-                        Err(e) => {
-                            if let Some(inner_source) = e.source() {
-                                println!("Caused by: {}", inner_source);
-                            }
-                            error!("api call error: {}", e);
-                            panic!("unexpected api call error")
-                        }
+            let params = CreateHostRequest {
+                host: host.to_string(),
+                groups: vec![
+                    ZabbixHostGroup {
+                        group_id: test_env.latest_host_group_id.to_string(),
                     }
+                ],
+                interfaces: vec![],
+                tags: vec![],
+                templates: vec![],
+                macros: vec![],
+                inventory_mode: 0,
+                inventory: HashMap::new(),
+            };
 
+            match test_env.client.create_host(&test_env.session, &params) {
+                Ok(host_id) => {
+                    assert!(host_id > 0)
                 }
                 Err(e) => {
                     if let Some(inner_source) = e.source() {
