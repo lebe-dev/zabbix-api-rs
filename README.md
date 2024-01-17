@@ -48,10 +48,11 @@ fn main() {
   - [ ] Triggers
   - [ ] Web-scenarios
 - [ ] Create
-    - [ ] Host
-    - [ ] Item
-    - [ ] Trigger
-    - [ ] Web-scenario
+  - [ ] HostGroup
+  - [x] Host
+  - [ ] Item
+  - [ ] Trigger
+  - [ ] Web-scenario
 
 ## Limitations
 

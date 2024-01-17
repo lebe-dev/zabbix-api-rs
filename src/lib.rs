@@ -5,7 +5,13 @@ pub mod host;
 pub mod item;
 
 pub mod trigger;
+
+pub mod template;
+
+pub mod r#macro;
+
 pub mod error;
+
 
 #[cfg(test)]
 mod tests;
