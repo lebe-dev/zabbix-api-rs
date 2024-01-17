@@ -11,6 +11,7 @@ use crate::host::ZabbixHostGroup;
 use crate::item::create::CreateItemRequest;
 use crate::tests::init_logging;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
+use crate::trigger::create::CreateTriggerRequest;
 
 pub struct TestEnvBuilder {
     pub client: ZabbixApiV6Client,
@@ -19,7 +20,8 @@ pub struct TestEnvBuilder {
 
     pub latest_host_group_id: u32,
     pub latest_host_id: u32,
-    pub latest_item_id: u32
+    pub latest_item_id: u32,
+    pub latest_trigger_id: u32
 }
 
 impl TestEnvBuilder {
@@ -37,6 +39,7 @@ impl TestEnvBuilder {
             latest_host_group_id: 0,
             latest_host_id: 0,
             latest_item_id: 0,
+            latest_trigger_id: 0
         }
     }
 
@@ -122,8 +125,8 @@ impl TestEnvBuilder {
         };
 
         match &self.client.create_item(&self.session, &params) {
-            Ok(host_id) => {
-                self.latest_host_id = host_id.to_owned();
+            Ok(item_id) => {
+                self.latest_item_id = item_id.to_owned();
                 self
             }
             Err(e) => {
@@ -132,6 +135,32 @@ impl TestEnvBuilder {
                 }
 
                 error!("item create error: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
+    pub fn create_trigger(&mut self, host_name: &str, description: &str, item_key: &str) -> &mut Self {
+        let expression = format!("last(/{host_name}/{item_key})=0");
+
+        let params = CreateTriggerRequest {
+            description: description.to_string(),
+            expression: expression.to_string(),
+            dependencies: vec![],
+            tags: vec![],
+        };
+
+        match &self.client.create_trigger(&self.session, &params) {
+            Ok(trigger_id) => {
+                self.latest_trigger_id = trigger_id.to_owned();
+                self
+            }
+            Err(e) => {
+                if let Some(inner_source) = e.source() {
+                    println!("Caused by: {}", inner_source);
+                }
+
+                error!("trigger create error: {}", e);
                 panic!("{}", e)
             }
         }
