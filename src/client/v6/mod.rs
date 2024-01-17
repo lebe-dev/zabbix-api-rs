@@ -66,7 +66,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("auth error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -113,7 +113,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("auth error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -159,7 +159,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("auth error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -213,7 +213,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("auth error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -268,7 +268,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -323,7 +323,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -378,7 +378,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
@@ -433,7 +433,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("error: {}", e);
+                error!("{}", e);
                 Err(e)
             }
         }
