@@ -284,6 +284,8 @@ impl ZabbixApiClient for ZabbixApiV6Client {
 
 #[cfg(test)]
 mod tests {
+    use std::error::Error;
+
     use log::{error, info};
     use reqwest::blocking::Client;
     use serde::Serialize;
@@ -291,6 +293,7 @@ mod tests {
     use crate::client::v6::ZabbixApiV6Client;
     use crate::client::ZabbixApiClient;
     use crate::host::ZabbixHost;
+    use crate::item::create::CreateItemRequest;
     use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
@@ -369,6 +372,55 @@ mod tests {
             test_env.get_session()
                      .create_host_group(&group_name)
                      .create_host(&host_name);
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+        }
+    }
+
+    #[test]
+    fn create_item() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env.get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name);
+
+            let item_key = get_random_string();
+            let item_name = get_random_string();
+
+            let request = CreateItemRequest {
+                key_: item_key,
+                name: item_name,
+                host_id: test_env.latest_host_id.to_string(),
+                r#type: 7,
+                value_type: 4,
+                interface_id: "0".to_string(),
+                tags: vec![],
+                delay: "30s".to_string(),
+            };
+
+            match test_env.client.create_item(
+                &test_env.session, &request
+            ) {
+                Ok(item_id) => {
+                    assert!(item_id > 0);
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("item create error: {}", e);
+                    panic!("{}", e)
+                }
+            }
 
             assert!(test_env.latest_host_group_id > 0);
             assert!(test_env.latest_host_id > 0);

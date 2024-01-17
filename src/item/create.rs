@@ -5,6 +5,7 @@ use crate::host::ZabbixHostTag;
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/item/create
 #[derive(Serialize,Debug)]
 pub struct CreateItemRequest {
+    pub name: String,
     pub key_: String,
     #[serde(rename = "hostid")]
     pub host_id: String,
