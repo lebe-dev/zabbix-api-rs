@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Debug)]
 pub struct ZabbixHost {
     #[serde(rename = "hostid")]
     pub host_id: String,

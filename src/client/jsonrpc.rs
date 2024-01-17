@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde::de::DeserializeOwned;
 
 #[derive(Serialize)]
 pub struct ZabbixApiRequest<T: Serialize> {

@@ -35,10 +35,12 @@ fn main() {
 }
 ```
 
+- You can make raw api calls. 
+
 ## API Methods RoadMap
 
 - [x] Authentication
-- [ ] RAW API Call
+- [x] RAW API Call
 - [ ] Search
   - [ ] Host
   - [ ] Hosts
@@ -53,4 +55,4 @@ fn main() {
 
 ## Limitations
 
-- [API v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
+- API support: [v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
