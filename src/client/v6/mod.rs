@@ -12,6 +12,7 @@ use crate::error::ZabbixApiError;
 use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
+use crate::webscenario::create::{CreateWebScenarioRequest, CreateWebScenarioResponse};
 
 pub struct ZabbixApiV6Client {
     client: Client,
@@ -336,6 +337,61 @@ impl ZabbixApiClient for ZabbixApiV6Client {
             }
         }
     }
+
+    fn create_webscenario(&self, session: &str, request: &CreateWebScenarioRequest) -> Result<u32, ZabbixApiError> {
+        info!("creating web-scenario '{}' for host id '{}'..", request.name, request.host_id);
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: "2.0".to_string(),
+            method: "httptest.create".to_string(),
+            params: request,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateWebScenarioResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+
+                        info!("web-scenario '{}' has been created", request.name);
+
+                        match result.http_test_ids.first() {
+                            Some(host_id) => {
+                                host_id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
+                            }
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("error: {}", e);
+                Err(e)
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -354,6 +410,8 @@ mod tests {
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::trigger::create::CreateTriggerRequest;
+    use crate::webscenario::create::CreateWebScenarioRequest;
+    use crate::webscenario::ZabbixWebScenarioStep;
 
     #[test]
     fn session_should_be_returned() {
@@ -520,6 +578,53 @@ mod tests {
                     }
 
                     error!("trigger create error: {}", e);
+                    panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn create_web_scenario() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env.get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name);
+
+            let web_scenario_name = get_random_string();
+
+            let step = ZabbixWebScenarioStep {
+                name: "Check github.com page".to_string(),
+                url: "https://github.com".to_string(),
+                status_codes: "200".to_string(),
+                no: 0,
+            };
+
+            let request = CreateWebScenarioRequest {
+                name: web_scenario_name,
+                host_id: test_env.latest_host_id.to_string(),
+                steps: vec![step],
+            };
+
+            match test_env.client.create_webscenario(
+                &test_env.session, &request
+            ) {
+                Ok(web_scenario_id) => {
+                    assert!(web_scenario_id > 0);
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("web-scenario create error: {}", e);
                     panic!("{}", e)
                 }
             }

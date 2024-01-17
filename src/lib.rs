@@ -6,6 +6,8 @@ pub mod item;
 
 pub mod trigger;
 
+pub mod webscenario;
+
 pub mod template;
 
 pub mod r#macro;

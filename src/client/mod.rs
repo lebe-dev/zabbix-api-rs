@@ -6,6 +6,7 @@ use crate::error::ZabbixApiError;
 use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
 use crate::item::create::CreateItemRequest;
 use crate::trigger::create::CreateTriggerRequest;
+use crate::webscenario::create::CreateWebScenarioRequest;
 
 pub mod jsonrpc;
 pub mod v6;
@@ -23,4 +24,6 @@ pub trait ZabbixApiClient {
     fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError>;
 
     fn create_trigger(&self, session: &str, request: &CreateTriggerRequest) -> Result<u32, ZabbixApiError>;
+
+    fn create_webscenario(&self, session: &str, request: &CreateWebScenarioRequest) -> Result<u32, ZabbixApiError>;
 }

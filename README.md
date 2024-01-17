@@ -47,12 +47,12 @@ fn main() {
   - [ ] Items
   - [ ] Triggers
   - [ ] Web-scenarios
-- [ ] Create
+- [x] Create
   - [x] HostGroup
   - [x] Host
   - [x] Item
   - [x] Trigger
-  - [ ] Web-scenario
+  - [x] Web-scenario
 
 ## TODO
 

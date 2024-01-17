@@ -12,6 +12,8 @@ use crate::item::create::CreateItemRequest;
 use crate::tests::init_logging;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
+use crate::webscenario::create::CreateWebScenarioRequest;
+use crate::webscenario::ZabbixWebScenarioStep;
 
 pub struct TestEnvBuilder {
     pub client: ZabbixApiV6Client,
@@ -161,6 +163,36 @@ impl TestEnvBuilder {
                 }
 
                 error!("trigger create error: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
+    pub fn create_web_scenario(&mut self, name: &str) -> &mut Self {
+        let step = ZabbixWebScenarioStep {
+            name: "Check github.com page".to_string(),
+            url: "https://github.com".to_string(),
+            status_codes: "200".to_string(),
+            no: 0,
+        };
+
+        let request = CreateWebScenarioRequest {
+            name: name.to_string(),
+            host_id: self.latest_host_id.to_string(),
+            steps: vec![step],
+        };
+
+        match &self.client.create_webscenario(&self.session, &request) {
+            Ok(trigger_id) => {
+                self.latest_trigger_id = trigger_id.to_owned();
+                self
+            }
+            Err(e) => {
+                if let Some(inner_source) = e.source() {
+                    println!("Caused by: {}", inner_source);
+                }
+
+                error!("web-scenario create error: {}", e);
                 panic!("{}", e)
             }
         }
