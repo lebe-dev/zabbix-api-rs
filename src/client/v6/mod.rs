@@ -9,7 +9,7 @@ use crate::client::jsonrpc::{ZabbixApiRequest, ZabbixApiResponse};
 use crate::client::post::send_post_request;
 use crate::client::ZabbixApiClient;
 use crate::error::ZabbixApiError;
-use crate::host::create::{CreateHostRequest, CreateHostResponse};
+use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
 
 pub struct ZabbixApiV6Client {
     client: Client,
@@ -116,6 +116,60 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError> {
+        info!("creating host group '{}'..", request.name);
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: "2.0".to_string(),
+            method: "hostgroup.create".to_string(),
+            params: request,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateHostGroupResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+                        info!("host group '{}' has been created", request.name);
+
+                        match result.group_ids.first() {
+                            Some(id) => {
+                                id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
+                            }
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("auth error: {}", e);
+                Err(e)
+            }
+        }
+    }
+
     fn create_host(&self, session: &str, request: &CreateHostRequest) -> Result<u32, ZabbixApiError> {
         info!("creating host '{}'..", request.host);
 
@@ -183,8 +237,8 @@ mod tests {
 
     use crate::client::v6::ZabbixApiV6Client;
     use crate::client::ZabbixApiClient;
-    use crate::host::create::CreateHostRequest;
-    use crate::host::ZabbixHost;
+    use crate::host::{ZabbixHost, ZabbixHostGroup};
+    use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
     use crate::tests::{get_random_string, init_logging};
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
 
@@ -261,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn create_host() {
+    fn create_host_group_and_host() {
         init_logging();
 
         if are_integration_tests_enabled() {
@@ -274,22 +328,46 @@ mod tests {
             match client.get_auth_session(&tests_config.zabbix_api_user, &tests_config.zabbix_api_password) {
                 Ok(session) => {
 
-                    let host = get_random_string();
+                    let group_name = get_random_string();
 
-                    let params = CreateHostRequest {
-                        host: host.to_string(),
-                        groups: vec![],
-                        interfaces: vec![],
-                        tags: vec![],
-                        templates: vec![],
-                        macros: vec![],
-                        inventory_mode: 0,
-                        inventory: HashMap::new(),
+                    let params = CreateHostGroupRequest {
+                        name: group_name,
                     };
 
-                    match client.create_host(&session, &params) {
-                        Ok(host_id) => {
-                            assert!(host_id > 0)
+                    match client.create_host_group(&session, &params) {
+                        Ok(group_id) => {
+                            assert!(group_id > 0);
+
+                            let host = get_random_string();
+
+                            let params = CreateHostRequest {
+                                host: host.to_string(),
+                                groups: vec![
+                                    ZabbixHostGroup {
+                                        group_id: group_id.to_string(),
+                                    }
+                                ],
+                                interfaces: vec![],
+                                tags: vec![],
+                                templates: vec![],
+                                macros: vec![],
+                                inventory_mode: 0,
+                                inventory: HashMap::new(),
+                            };
+
+                            match client.create_host(&session, &params) {
+                                Ok(host_id) => {
+                                    assert!(host_id > 0)
+                                }
+                                Err(e) => {
+                                    if let Some(inner_source) = e.source() {
+                                        println!("Caused by: {}", inner_source);
+                                    }
+                                    error!("api call error: {}", e);
+                                    panic!("unexpected api call error")
+                                }
+                            }
+
                         }
                         Err(e) => {
                             if let Some(inner_source) = e.source() {

@@ -6,6 +6,18 @@ use crate::host::{ZabbixHostGroup, ZabbixHostInterface, ZabbixHostTag};
 use crate::r#macro::ZabbixHostMacro;
 use crate::template::ZabbixTemplate;
 
+/// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/hostgroup/create
+#[derive(Serialize,Debug)]
+pub struct CreateHostGroupRequest {
+    pub name: String
+}
+
+#[derive(Deserialize,Debug)]
+pub struct CreateHostGroupResponse {
+    #[serde(rename = "groupids")]
+    pub group_ids: Vec<String>
+}
+
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/create
 #[derive(Serialize,Debug)]
 pub struct CreateHostRequest {

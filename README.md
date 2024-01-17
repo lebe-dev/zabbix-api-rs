@@ -48,7 +48,7 @@ fn main() {
   - [ ] Triggers
   - [ ] Web-scenarios
 - [ ] Create
-  - [ ] HostGroup
+  - [x] HostGroup
   - [x] Host
   - [ ] Item
   - [ ] Trigger
