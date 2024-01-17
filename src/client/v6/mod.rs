@@ -284,17 +284,13 @@ impl ZabbixApiClient for ZabbixApiV6Client {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-    use std::error::Error;
-
     use log::{error, info};
     use reqwest::blocking::Client;
     use serde::Serialize;
 
     use crate::client::v6::ZabbixApiV6Client;
     use crate::client::ZabbixApiClient;
-    use crate::host::{ZabbixHost, ZabbixHostGroup};
-    use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
+    use crate::host::ZabbixHost;
     use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
@@ -368,44 +364,14 @@ mod tests {
             let mut test_env = TestEnvBuilder::build();
 
             let group_name = get_random_string();
+            let host_name = get_random_string();
 
-            &test_env.get_session().create_host_group(&group_name);
+            test_env.get_session()
+                     .create_host_group(&group_name)
+                     .create_host(&host_name);
 
-            let group_name = get_random_string();
-
-            let params = CreateHostGroupRequest {
-                name: group_name,
-            };
-
-            let host = get_random_string();
-
-            let params = CreateHostRequest {
-                host: host.to_string(),
-                groups: vec![
-                    ZabbixHostGroup {
-                        group_id: test_env.latest_host_group_id.to_string(),
-                    }
-                ],
-                interfaces: vec![],
-                tags: vec![],
-                templates: vec![],
-                macros: vec![],
-                inventory_mode: 0,
-                inventory: HashMap::new(),
-            };
-
-            match test_env.client.create_host(&test_env.session, &params) {
-                Ok(host_id) => {
-                    assert!(host_id > 0)
-                }
-                Err(e) => {
-                    if let Some(inner_source) = e.source() {
-                        println!("Caused by: {}", inner_source);
-                    }
-                    error!("api call error: {}", e);
-                    panic!("unexpected api call error")
-                }
-            }
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
         }
     }
 }
