@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub mod create;
 pub mod search;
@@ -11,4 +11,11 @@ pub struct ZabbixTrigger {
     #[serde(alias = "description")]
     pub name: String,
     pub expression: String
+}
+
+/// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/trigger/object#trigger-tag
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ZabbixTriggerTag {
+    pub tag: String,
+    pub value: String,
 }

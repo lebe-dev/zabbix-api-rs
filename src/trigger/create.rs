@@ -1,16 +1,23 @@
 use serde::{Deserialize, Serialize};
 
-use crate::error::ZabbixError;
+use crate::trigger::ZabbixTriggerTag;
 
 #[derive(Serialize)]
-pub struct TriggerCreateRequestParams {
+pub struct CreateTriggerRequest {
     pub description: String,
     pub expression: String,
-    pub priority: String,
-    pub url: String
+    pub dependencies: Vec<ZabbixTriggerDependency>,
+    pub tags: Vec<ZabbixTriggerTag>
+}
+
+#[derive(Serialize)]
+pub struct ZabbixTriggerDependency {
+    #[serde(alias = "triggerid")]
+    pub trigger_id: String,
 }
 
 #[derive(Deserialize)]
 pub struct CreateTriggerResponse {
-    pub error: Option<ZabbixError>
+    #[serde(rename = "triggerids")]
+    pub trigger_ids: Vec<String>
 }

@@ -11,6 +11,7 @@ use crate::client::ZabbixApiClient;
 use crate::error::ZabbixApiError;
 use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
+use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
 
 pub struct ZabbixApiV6Client {
     client: Client,
@@ -220,7 +221,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("auth error: {}", e);
+                error!("error: {}", e);
                 Err(e)
             }
         }
@@ -275,7 +276,62 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 }
             }
             Err(e) => {
-                error!("auth error: {}", e);
+                error!("error: {}", e);
+                Err(e)
+            }
+        }
+    }
+
+    fn create_trigger(&self, session: &str, request: &CreateTriggerRequest) -> Result<u32, ZabbixApiError> {
+        info!("creating trigger '{}' with expression '{}'..", request.description, request.expression);
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: "2.0".to_string(),
+            method: "trigger.create".to_string(),
+            params: request,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateTriggerResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+
+                        info!("trigger '{}' has been created", request.description);
+
+                        match result.trigger_ids.first() {
+                            Some(host_id) => {
+                                host_id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
+                            }
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("error: {}", e);
                 Err(e)
             }
         }
@@ -297,6 +353,7 @@ mod tests {
     use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
+    use crate::trigger::create::CreateTriggerRequest;
 
     #[test]
     fn session_should_be_returned() {
@@ -421,9 +478,51 @@ mod tests {
                     panic!("{}", e)
                 }
             }
+        }
+    }
 
-            assert!(test_env.latest_host_group_id > 0);
-            assert!(test_env.latest_host_id > 0);
+    #[test]
+    fn create_trigger() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            let item_name = get_random_string();
+            let item_key = format!("key{}", get_random_string());
+
+            test_env.get_session()
+                    .create_host_group(&group_name)
+                    .create_host(&host_name)
+                    .create_item(&item_name, &item_key);
+
+            let trigger_description = get_random_string();
+
+            let expression = format!("last(/{host_name}/{item_key})=0");
+
+            let request = CreateTriggerRequest {
+                description: trigger_description,
+                expression: expression.to_string(),
+                dependencies: vec![],
+                tags: vec![],
+            };
+
+            match test_env.client.create_trigger(
+                &test_env.session, &request
+            ) {
+                Ok(trigger_id) => assert!(trigger_id > 0),
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("trigger create error: {}", e);
+                    panic!("{}", e)
+                }
+            }
         }
     }
 }

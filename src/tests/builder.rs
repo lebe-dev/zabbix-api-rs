@@ -8,6 +8,7 @@ use crate::client::v6::ZabbixApiV6Client;
 use crate::client::ZabbixApiClient;
 use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
 use crate::host::ZabbixHostGroup;
+use crate::item::create::CreateItemRequest;
 use crate::tests::init_logging;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 
@@ -17,7 +18,8 @@ pub struct TestEnvBuilder {
     pub session: String,
 
     pub latest_host_group_id: u32,
-    pub latest_host_id: u32
+    pub latest_host_id: u32,
+    pub latest_item_id: u32
 }
 
 impl TestEnvBuilder {
@@ -33,7 +35,8 @@ impl TestEnvBuilder {
             integration_tests_config: tests_config,
             session: "".to_string(),
             latest_host_group_id: 0,
-            latest_host_id: 0
+            latest_host_id: 0,
+            latest_item_id: 0,
         }
     }
 
@@ -101,6 +104,34 @@ impl TestEnvBuilder {
                 }
 
                 error!("host create error: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
+    pub fn create_item(&mut self, name: &str, key_: &str) -> &mut Self {
+        let params = CreateItemRequest {
+            name: name.to_string(),
+            key_: key_.to_string(),
+            host_id: self.latest_host_id.to_string(),
+            r#type: 7,
+            value_type: 0,
+            interface_id: "0".to_string(),
+            tags: vec![],
+            delay: "60s".to_string(),
+        };
+
+        match &self.client.create_item(&self.session, &params) {
+            Ok(host_id) => {
+                self.latest_host_id = host_id.to_owned();
+                self
+            }
+            Err(e) => {
+                if let Some(inner_source) = e.source() {
+                    println!("Caused by: {}", inner_source);
+                }
+
+                error!("item create error: {}", e);
                 panic!("{}", e)
             }
         }

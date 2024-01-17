@@ -5,6 +5,7 @@ use crate::client::jsonrpc::ZabbixApiResponse;
 use crate::error::ZabbixApiError;
 use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
 use crate::item::create::CreateItemRequest;
+use crate::trigger::create::CreateTriggerRequest;
 
 pub mod jsonrpc;
 pub mod v6;
@@ -20,4 +21,6 @@ pub trait ZabbixApiClient {
     fn create_host(&self, session: &str, request: &CreateHostRequest) -> Result<u32, ZabbixApiError>;
 
     fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError>;
+
+    fn create_trigger(&self, session: &str, request: &CreateTriggerRequest) -> Result<u32, ZabbixApiError>;
 }

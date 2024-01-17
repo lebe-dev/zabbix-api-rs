@@ -51,8 +51,12 @@ fn main() {
   - [x] HostGroup
   - [x] Host
   - [x] Item
-  - [ ] Trigger
+  - [x] Trigger
   - [ ] Web-scenario
+
+## TODO
+
+- Use enums for Zabbix types (trigger type, value type, etc.)
 
 ## Limitations
 
