@@ -4,10 +4,11 @@ use serde::Serialize;
 use crate::client::jsonrpc::ZabbixApiResponse;
 use crate::error::ZabbixApiError;
 use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
+use crate::item::create::CreateItemRequest;
 
 pub mod jsonrpc;
-mod v6;
-mod post;
+pub mod v6;
+pub mod post;
 
 pub trait ZabbixApiClient {
     fn get_auth_session(&self, login: &str, token: &str) -> Result<String, ZabbixApiError>;
@@ -17,4 +18,6 @@ pub trait ZabbixApiClient {
     fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError>;
 
     fn create_host(&self, session: &str, request: &CreateHostRequest) -> Result<u32, ZabbixApiError>;
+
+    fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError>;
 }

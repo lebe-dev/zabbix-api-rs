@@ -10,6 +10,7 @@ use crate::client::post::send_post_request;
 use crate::client::ZabbixApiClient;
 use crate::error::ZabbixApiError;
 use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
+use crate::item::create::{CreateItemRequest, CreateItemResponse};
 
 pub struct ZabbixApiV6Client {
     client: Client,
@@ -224,6 +225,61 @@ impl ZabbixApiClient for ZabbixApiV6Client {
             }
         }
     }
+
+    fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError> {
+        info!("creating item with key '{}' for host id {}..", request.key_, request.host_id);
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: "2.0".to_string(),
+            method: "item.create".to_string(),
+            params: request,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateItemResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+
+                        info!("item '{}' has been created", request.key_);
+
+                        match result.item_ids.first() {
+                            Some(host_id) => {
+                                host_id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
+                            }
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("auth error: {}", e);
+                Err(e)
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -240,6 +296,7 @@ mod tests {
     use crate::host::{ZabbixHost, ZabbixHostGroup};
     use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
     use crate::tests::{get_random_string, init_logging};
+    use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
 
     #[test]
@@ -268,47 +325,36 @@ mod tests {
         init_logging();
 
         if are_integration_tests_enabled() {
-            let http_client = Client::new();
+            let mut test_env = TestEnvBuilder::build();
+            test_env.get_session();
 
-            let tests_config = get_integration_tests_config();
+            #[derive(Serialize)]
+            struct Params {
+                pub filter: Filter
+            }
 
-            let client = ZabbixApiV6Client::new(http_client, &tests_config.zabbix_api_url);
+            #[derive(Serialize)]
+            struct Filter {
+                pub host: Vec<String>
+            }
 
-            match client.get_auth_session(&tests_config.zabbix_api_user, &tests_config.zabbix_api_password) {
-                Ok(session) => {
-
-                    #[derive(Serialize)]
-                    struct Params {
-                        pub filter: Filter
-                    }
-
-                    #[derive(Serialize)]
-                    struct Filter {
-                        pub host: Vec<String>
-                    }
-
-                    let params = Params {
-                        filter: Filter {
-                            host: vec!["Zabbix server".to_string()],
-                        },
-                    };
-
-                    match client.raw_api_call::<Params, Vec<ZabbixHost>>(&session, "host.get", &params) {
-                        Ok(response) => {
-                            let results = response.result.unwrap();
-                            info!("{:?}", results.first().unwrap());
-                            assert_eq!(1, results.len())
-                        }
-                        Err(e) => {
-                            error!("api call error: {}", e);
-                            panic!("unexpected api call error")
-                        }
-                    }
-
+            let params = Params {
+                filter: Filter {
+                    host: vec!["Zabbix server".to_string()],
                 },
+            };
+
+            match test_env.client.raw_api_call::<Params, Vec<ZabbixHost>>(
+                &test_env.session, "host.get", &params) {
+
+                Ok(response) => {
+                    let results = response.result.unwrap();
+                    info!("{:?}", results.first().unwrap());
+                    assert_eq!(1, results.len())
+                }
                 Err(e) => {
-                    error!("auth error: {}", e);
-                    panic!("unexpected auth error")
+                    error!("api call error: {}", e);
+                    panic!("unexpected api call error")
                 }
             }
         }
@@ -319,55 +365,39 @@ mod tests {
         init_logging();
 
         if are_integration_tests_enabled() {
-            let http_client = Client::new();
+            let mut test_env = TestEnvBuilder::build();
+            test_env.get_session();
 
-            let tests_config = get_integration_tests_config();
+            let group_name = get_random_string();
 
-            let client = ZabbixApiV6Client::new(http_client, &tests_config.zabbix_api_url);
+            let params = CreateHostGroupRequest {
+                name: group_name,
+            };
 
-            match client.get_auth_session(&tests_config.zabbix_api_user, &tests_config.zabbix_api_password) {
-                Ok(session) => {
+            match &test_env.client.create_host_group(&test_env.session, &params) {
+                Ok(group_id) => {
+                    assert!(*group_id > 0);
 
-                    let group_name = get_random_string();
+                    let host = get_random_string();
 
-                    let params = CreateHostGroupRequest {
-                        name: group_name,
+                    let params = CreateHostRequest {
+                        host: host.to_string(),
+                        groups: vec![
+                            ZabbixHostGroup {
+                                group_id: group_id.to_string(),
+                            }
+                        ],
+                        interfaces: vec![],
+                        tags: vec![],
+                        templates: vec![],
+                        macros: vec![],
+                        inventory_mode: 0,
+                        inventory: HashMap::new(),
                     };
 
-                    match client.create_host_group(&session, &params) {
-                        Ok(group_id) => {
-                            assert!(group_id > 0);
-
-                            let host = get_random_string();
-
-                            let params = CreateHostRequest {
-                                host: host.to_string(),
-                                groups: vec![
-                                    ZabbixHostGroup {
-                                        group_id: group_id.to_string(),
-                                    }
-                                ],
-                                interfaces: vec![],
-                                tags: vec![],
-                                templates: vec![],
-                                macros: vec![],
-                                inventory_mode: 0,
-                                inventory: HashMap::new(),
-                            };
-
-                            match client.create_host(&session, &params) {
-                                Ok(host_id) => {
-                                    assert!(host_id > 0)
-                                }
-                                Err(e) => {
-                                    if let Some(inner_source) = e.source() {
-                                        println!("Caused by: {}", inner_source);
-                                    }
-                                    error!("api call error: {}", e);
-                                    panic!("unexpected api call error")
-                                }
-                            }
-
+                    match test_env.client.create_host(&test_env.session, &params) {
+                        Ok(host_id) => {
+                            assert!(host_id > 0)
                         }
                         Err(e) => {
                             if let Some(inner_source) = e.source() {
@@ -378,10 +408,13 @@ mod tests {
                         }
                     }
 
-                },
+                }
                 Err(e) => {
-                    error!("auth error: {}", e);
-                    panic!("unexpected auth error")
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+                    error!("api call error: {}", e);
+                    panic!("unexpected api call error")
                 }
             }
         }

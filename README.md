@@ -50,7 +50,7 @@ fn main() {
 - [ ] Create
   - [x] HostGroup
   - [x] Host
-  - [ ] Item
+  - [x] Item
   - [ ] Trigger
   - [ ] Web-scenario
 

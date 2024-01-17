@@ -2,6 +2,7 @@ use fake::{Fake, Faker};
 use log::LevelFilter;
 
 pub mod integration;
+pub mod builder;
 
 pub fn init_logging() {
     let _ = env_logger::builder().filter_level(LevelFilter::Debug)
