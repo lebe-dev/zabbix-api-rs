@@ -42,12 +42,12 @@ fn main() {
 - [x] Get API info
 - [x] Authentication
 - [x] RAW API Call
-- [ ] Search
+- [x] Search
   - [x] Host Group
   - [x] Hosts
   - [x] Items
   - [x] Triggers
-  - [ ] Web-scenarios
+  - [x] Web-scenarios
 - [x] Create
   - [x] Host Group
   - [x] Host

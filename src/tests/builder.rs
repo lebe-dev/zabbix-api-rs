@@ -23,7 +23,8 @@ pub struct TestEnvBuilder {
     pub latest_host_group_id: u32,
     pub latest_host_id: u32,
     pub latest_item_id: u32,
-    pub latest_trigger_id: u32
+    pub latest_trigger_id: u32,
+    pub latest_webscenario_id: u32
 }
 
 impl TestEnvBuilder {
@@ -41,7 +42,8 @@ impl TestEnvBuilder {
             latest_host_group_id: 0,
             latest_host_id: 0,
             latest_item_id: 0,
-            latest_trigger_id: 0
+            latest_trigger_id: 0,
+            latest_webscenario_id: 0,
         }
     }
 
@@ -174,7 +176,7 @@ impl TestEnvBuilder {
             name: "Check github.com page".to_string(),
             url: "https://github.com".to_string(),
             status_codes: "200".to_string(),
-            no: 0,
+            no: "0".to_string(),
         };
 
         let request = CreateWebScenarioRequest {
@@ -184,8 +186,8 @@ impl TestEnvBuilder {
         };
 
         match &self.client.create_webscenario(&self.session, &request) {
-            Ok(trigger_id) => {
-                self.latest_trigger_id = trigger_id.to_owned();
+            Ok(webscenario_id) => {
+                self.latest_webscenario_id = webscenario_id.to_owned();
                 self
             }
             Err(e) => {
