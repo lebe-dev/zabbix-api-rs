@@ -20,6 +20,7 @@ use crate::webscenario::ZabbixWebScenario;
 
 const JSON_RPC_VERSION: &str = "2.0";
 
+#[derive(Debug,Clone)]
 pub struct ZabbixApiV6Client {
     client: Client,
     api_endpoint_url: String
