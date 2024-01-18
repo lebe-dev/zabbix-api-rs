@@ -12,6 +12,7 @@ use crate::error::ZabbixApiError;
 use crate::host::{ZabbixHost, ZabbixHostGroup};
 use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
+use crate::item::ZabbixItem;
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
 use crate::webscenario::create::{CreateWebScenarioRequest, CreateWebScenarioResponse};
 
@@ -228,6 +229,51 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("[/response body]");
 
                 let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixHost>>>(&response_body)?;
+
+                match response.result {
+                    Some(results) => {
+                        info!("hosts found: {:?}", results);
+                        Ok(results)
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
+    fn get_items<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixItem>, ZabbixApiError> {
+        info!("getting items with params");
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: JSON_RPC_VERSION.to_string(),
+            method: "item.get".to_string(),
+            params,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixItem>>>(&response_body)?;
 
                 match response.result {
                     Some(results) => {

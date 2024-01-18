@@ -6,6 +6,7 @@ use crate::error::ZabbixApiError;
 use crate::host::{ZabbixHost, ZabbixHostGroup};
 use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
 use crate::item::create::CreateItemRequest;
+use crate::item::ZabbixItem;
 use crate::trigger::create::CreateTriggerRequest;
 use crate::webscenario::create::CreateWebScenarioRequest;
 
@@ -24,6 +25,8 @@ pub trait ZabbixApiClient {
     fn get_host_groups<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHostGroup>, ZabbixApiError>;
 
     fn get_hosts<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHost>, ZabbixApiError>;
+
+    fn get_items<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixItem>, ZabbixApiError>;
 
     fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError>;
 
