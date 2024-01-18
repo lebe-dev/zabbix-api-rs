@@ -14,6 +14,7 @@ use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, Creat
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
 use crate::item::ZabbixItem;
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
+use crate::trigger::ZabbixTrigger;
 use crate::webscenario::create::{CreateWebScenarioRequest, CreateWebScenarioResponse};
 
 const JSON_RPC_VERSION: &str = "2.0";
@@ -301,6 +302,50 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    fn get_triggers<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixTrigger>, ZabbixApiError> {
+        info!("getting triggers..");
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: JSON_RPC_VERSION.to_string(),
+            method: "trigger.get".to_string(),
+            params,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixTrigger>>>(&response_body)?;
+
+                match response.result {
+                    Some(results) => {
+                        info!("hosts found: {:?}", results);
+                        Ok(results)
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
 
     fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError> {
         info!("creating host group '{}'..", request.name);
@@ -594,6 +639,7 @@ mod tests {
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::trigger::create::CreateTriggerRequest;
+    use crate::trigger::get::GetTriggerRequest;
     use crate::webscenario::create::CreateWebScenarioRequest;
     use crate::webscenario::ZabbixWebScenarioStep;
 
@@ -759,6 +805,50 @@ mod tests {
                     let host = hosts.first().unwrap();
 
                     assert_eq!(&host.host, &host_name2)
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("host get error: {}", e);
+                    panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn get_triggers_test() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+            let item_name = get_random_string();
+            let item_key = get_random_string();
+            let trigger_description = get_random_string();
+
+            test_env.get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name)
+                .create_item(&item_name, &item_key)
+                .create_trigger(&host_name, &trigger_description, &item_key);
+
+            let request = GetTriggerRequest {
+                trigger_ids: test_env.latest_trigger_id.to_string(),
+                output: "extend".to_string(),
+                select_functions: "extend".to_string(),
+            };
+
+            match test_env.client.get_triggers(&test_env.session, &request) {
+                Ok(results) => {
+                    assert_eq!(results.len(), 1);
+                    let result = results.first().unwrap();
+
+                    assert_eq!(&result.description, &trigger_description)
                 }
                 Err(e) => {
                     if let Some(inner_source) = e.source() {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod create;
-pub mod search;
+pub mod get;
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/trigger/object
 #[derive(Deserialize, Clone, Debug)]
@@ -9,7 +9,7 @@ pub struct ZabbixTrigger {
     #[serde(alias = "triggerid")]
     pub trigger_id: String,
     #[serde(alias = "description")]
-    pub name: String,
+    pub description: String,
     pub expression: String
 }
 
