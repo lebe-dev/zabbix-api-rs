@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod create;
+pub mod get;
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/object
 #[derive(Deserialize,Debug)]
@@ -33,8 +34,9 @@ pub struct ZabbixHostInterface {
 }
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/hostgroup/object
-#[derive(Serialize, Deserialize,Debug)]
+#[derive(Serialize,Deserialize,Clone,Debug)]
 pub struct ZabbixHostGroup {
+    pub name: String,
     #[serde(rename = "groupid")]
     pub group_id: String,
 }

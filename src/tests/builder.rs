@@ -87,6 +87,7 @@ impl TestEnvBuilder {
             host: name.to_string(),
             groups: vec![
                 ZabbixHostGroup {
+                    name: "".to_string(),
                     group_id: self.latest_host_group_id.to_string(),
                 }
             ],

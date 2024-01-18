@@ -43,13 +43,13 @@ fn main() {
 - [x] Authentication
 - [x] RAW API Call
 - [ ] Search
-  - [ ] Host
+  - [x] Host Group
   - [ ] Hosts
   - [ ] Items
   - [ ] Triggers
   - [ ] Web-scenarios
 - [x] Create
-  - [x] HostGroup
+  - [x] Host Group
   - [x] Host
   - [x] Item
   - [x] Trigger
