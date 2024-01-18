@@ -44,7 +44,7 @@ fn main() {
 - [x] RAW API Call
 - [ ] Search
   - [x] Host Group
-  - [ ] Hosts
+  - [x] Hosts
   - [ ] Items
   - [ ] Triggers
   - [ ] Web-scenarios

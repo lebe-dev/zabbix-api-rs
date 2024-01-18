@@ -9,8 +9,8 @@ use crate::client::jsonrpc::{ZabbixApiRequest, ZabbixApiResponse};
 use crate::client::post::send_post_request;
 use crate::client::ZabbixApiClient;
 use crate::error::ZabbixApiError;
+use crate::host::{ZabbixHost, ZabbixHostGroup};
 use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
-use crate::host::ZabbixHostGroup;
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
 use crate::webscenario::create::{CreateWebScenarioRequest, CreateWebScenarioResponse};
@@ -72,7 +72,6 @@ impl ZabbixApiClient for ZabbixApiV6Client {
             }
         }
     }
-
 
     fn get_auth_session(&self,  login: &str, token: &str) -> Result<String, ZabbixApiError> {
         info!("getting auth session for user '{login}'..");
@@ -210,6 +209,52 @@ impl ZabbixApiClient for ZabbixApiV6Client {
             }
         }
     }
+
+    fn get_hosts<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHost>, ZabbixApiError> {
+        info!("getting hosts with params");
+
+        let api_request = ZabbixApiRequest {
+            jsonrpc: JSON_RPC_VERSION.to_string(),
+            method: "host.get".to_string(),
+            params,
+            id: 1,
+            auth: Some(session.to_string()),
+        };
+
+        match send_post_request(&self.client, &self.api_endpoint_url, api_request) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixHost>>>(&response_body)?;
+
+                match response.result {
+                    Some(results) => {
+                        info!("hosts found: {:?}", results);
+                        Ok(results)
+                    }
+                    None => {
+                        match response.error {
+                            Some(error) => {
+                                error!("{:?}", error);
+
+                                Err(ZabbixApiError::ApiCallError {
+                                    zabbix: error,
+                                })
+                            }
+                            None => Err(ZabbixApiError::BadRequestError)
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
 
     fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError> {
         info!("creating host group '{}'..", request.name);
@@ -496,7 +541,7 @@ mod tests {
 
     use crate::client::v6::ZabbixApiV6Client;
     use crate::client::ZabbixApiClient;
-    use crate::host::get::GetHostGroupsRequest;
+    use crate::host::get::{GetHostGroupsRequest, GetHostsRequest};
     use crate::host::ZabbixHost;
     use crate::item::create::CreateItemRequest;
     use crate::tests::{get_random_string, init_logging};
@@ -625,7 +670,56 @@ mod tests {
                         println!("Caused by: {}", inner_source);
                     }
 
-                    error!("item create error: {}", e);
+                    error!("host group get error: {}", e);
+                    panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn get_hosts_test() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name1 = get_random_string();
+            let host_name2 = get_random_string();
+            let host_name3 = get_random_string();
+
+            test_env.get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name1)
+                .create_host(&host_name2)
+                .create_host(&host_name3);
+
+            #[derive(Serialize)]
+            struct Filter {
+                pub host: Vec<String>
+            }
+
+            let request = GetHostsRequest {
+                filter: Filter {
+                    host: vec![host_name2.to_string()],
+                },
+            };
+
+            match test_env.client.get_hosts(&test_env.session, &request) {
+                Ok(hosts) => {
+                    assert_eq!(hosts.len(), 1);
+
+                    let host = hosts.first().unwrap();
+
+                    assert_eq!(&host.host, &host_name2)
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("host get error: {}", e);
                     panic!("{}", e)
                 }
             }
