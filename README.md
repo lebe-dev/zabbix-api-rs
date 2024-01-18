@@ -37,7 +37,7 @@ fn main() {
 
 - You can make [raw api calls](src/client/v6/mod.rs#L113).
 
-## API Methods RoadMap
+## API Methods
 
 - [x] Get API info
 - [x] Authentication
@@ -57,6 +57,7 @@ fn main() {
 
 ## TODO
 
+- Add examples
 - Use enums for Zabbix types (trigger type, value type, etc.)
 
 ## Limitations
