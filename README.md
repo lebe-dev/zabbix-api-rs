@@ -28,7 +28,7 @@ fn main() {
   match client.get_auth_session("Admin", "zabbix") {
     Ok(session) => println!("session: {session}"),
     Err(e) => {
-        error!("error: {}", e);
+        eprintln!("error: {}", e);
         panic!("unexpected error")
     }
   }
