@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
+
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/trigger/get
 #[derive(Serialize, Debug)]
 pub struct GetTriggerByIdRequest {
@@ -26,8 +28,8 @@ impl GetTriggerByDescriptionRequest {
             search: TriggerNameSearch {
                 description: description.to_string(),
             },
-            output: "extend".to_string(),
-            select_functions: "extend".to_string(),
+            output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
+            select_functions: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
         }
     }
 }
