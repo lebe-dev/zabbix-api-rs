@@ -754,7 +754,7 @@ mod tests {
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerRequest;
     use crate::webscenario::create::CreateWebScenarioRequest;
-    use crate::webscenario::get::GetWebScenarioRequest;
+    use crate::webscenario::get::GetWebScenarioByIdRequest;
     use crate::webscenario::ZabbixWebScenarioStep;
 
     #[test]
@@ -1053,7 +1053,7 @@ mod tests {
                 .create_trigger(&host_name, &trigger_description, &item_key)
                 .create_web_scenario(&webscenario_name);
 
-            let request = GetWebScenarioRequest {
+            let request = GetWebScenarioByIdRequest {
                 output: "extend".to_string(),
                 select_steps: "extend".to_string(),
                 httptest_ids: test_env.latest_webscenario_id.to_string(),
