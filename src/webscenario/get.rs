@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
+
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/httptest/get
 #[derive(Serialize,Debug)]
 pub struct GetWebScenarioByIdRequest {
@@ -26,8 +28,8 @@ pub struct GetWebScenarioByNameRequest {
 impl GetWebScenarioByNameRequest {
     pub fn new(name: &str) -> GetWebScenarioByNameRequest {
         GetWebScenarioByNameRequest {
-            output: "extend".to_string(),
-            select_steps: "extend".to_string(),
+            output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
+            select_steps: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
             search: WebScenarioNameFilter {
                 name: name.to_string(),
             },

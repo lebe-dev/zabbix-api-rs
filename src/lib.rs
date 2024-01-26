@@ -14,5 +14,7 @@ pub mod r#macro;
 
 pub mod error;
 
+pub const ZABBIX_EXTEND_PROPERTY_VALUE: &str = "extend";
+
 #[cfg(test)]
 mod tests;

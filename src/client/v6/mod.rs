@@ -756,6 +756,7 @@ mod tests {
     use crate::webscenario::create::CreateWebScenarioRequest;
     use crate::webscenario::get::GetWebScenarioByIdRequest;
     use crate::webscenario::ZabbixWebScenarioStep;
+    use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
 
     #[test]
     fn get_api_info() {
@@ -857,7 +858,7 @@ mod tests {
             }
 
             let request = GetHostGroupsRequest {
-                output: "extend".to_string(),
+                output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
                 filter: Filter {
                     name: vec![group_name2.to_string()],
                 },
@@ -959,7 +960,7 @@ mod tests {
             }
 
             let request = GetItemsRequest {
-                output: "extend".to_string(),
+                output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
                 with_triggers: false,
                 host_ids: test_env.latest_host_id.to_string(),
                 search: Search {
@@ -1009,8 +1010,8 @@ mod tests {
 
             let request = GetTriggerByIdRequest {
                 trigger_ids: test_env.latest_trigger_id.to_string(),
-                output: "extend".to_string(),
-                select_functions: "extend".to_string(),
+                output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
+                select_functions: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
             };
 
             match test_env.client.get_triggers(&test_env.session, &request) {
@@ -1054,8 +1055,8 @@ mod tests {
                 .create_web_scenario(&webscenario_name);
 
             let request = GetWebScenarioByIdRequest {
-                output: "extend".to_string(),
-                select_steps: "extend".to_string(),
+                output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
+                select_steps: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
                 httptest_ids: test_env.latest_webscenario_id.to_string(),
             };
 
