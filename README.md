@@ -16,12 +16,15 @@ zabbix-api = "0.1.0"
 Then use:
 
 ```rust
-use reqwest::blocking::Client;
+use reqwest::blocking::ClientBuilder;
 use crate::client::v6::ZabbixApiV6Client;
 use crate::client::ZabbixApiClient;
 
 fn main() {
-  let http_client = Client::new();
+  
+  let http_client = ClientBuilder::new()
+                                .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
+                                .build().unwrap();
 
   let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
     
