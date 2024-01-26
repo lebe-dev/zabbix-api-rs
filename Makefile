@@ -89,7 +89,7 @@ tree: clean
 
 .PHONY: tests test2
 tests:
-	(cd hello && cargo test)
+	cargo test
 
 # enable makefile to accept argument after command
 #https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line

@@ -1,0 +1,17 @@
+[package]
+name = "hello"
+version = "0.1.0"
+edition = "2021"
+description = "Demostrate CRUD app using clap 4"
+license = "Apache-2.0"
+homepage = "https://loco.rs/"
+documentation = "https://docs.rs/loco-rs"
+authors = ["T.J. Yang <tjyang2001@gmail.com>"]
+repository = "https://github.com/loco-rs/loco"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#clap = { version = "4.4.13", feactures = ["color","error-context","help","std","suggestions","usage","cargo","debug","deprecated","derive","env","string","unicode","unstable-doc","unstable-styles","unstable-v5","wrap_help"],optional = true}
+clap = { version = "4.4.18", default-features = false, features = ["std", "help","cargo","derive"] }
+
