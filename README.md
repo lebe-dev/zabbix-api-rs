@@ -67,3 +67,4 @@ fn main() {
 ## Limitations
 
 - API support: [v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
+- Synchronous requests only
