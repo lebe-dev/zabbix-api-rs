@@ -10,7 +10,7 @@ Add dependencies:
 ```toml
 [dependencies]
 reqwest = { version = "0.11.23", features = ["blocking", "json"] }
-zabbix-api = "0.1.0"
+zabbix-api = "0.2.0"
 ```
 
 Then use:
