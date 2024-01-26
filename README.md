@@ -10,25 +10,28 @@ Add dependencies:
 ```toml
 [dependencies]
 reqwest = { version = "0.11.23", features = ["blocking", "json"] }
-zabbix-api = "0.1.0"
+zabbix-api = "0.2.0"
 ```
 
 Then use:
 
 ```rust
-use reqwest::blocking::Client;
+use reqwest::blocking::ClientBuilder;
 use crate::client::v6::ZabbixApiV6Client;
 use crate::client::ZabbixApiClient;
 
 fn main() {
-  let http_client = Client::new();
+  
+  let http_client = ClientBuilder::new()
+                                .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
+                                .build().unwrap();
 
   let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
     
   match client.get_auth_session("Admin", "zabbix") {
     Ok(session) => println!("session: {session}"),
     Err(e) => {
-        error!("error: {}", e);
+        eprintln!("error: {}", e);
         panic!("unexpected error")
     }
   }
@@ -67,3 +70,4 @@ fn main() {
 ## Limitations
 
 - API support: [v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
+- Synchronous requests only

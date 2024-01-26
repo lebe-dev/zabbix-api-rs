@@ -26,8 +26,47 @@ pub trait ZabbixApiClient {
 
     fn get_host_groups<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHostGroup>, ZabbixApiError>;
 
+    /// # get_hosts
+    ///
+    /// Find zabbix hosts.
+    ///
+    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::host::get::GetHostsRequest;
+    /// use serde::Serialize;
+    /// use zabbix_api::client::v6::ZabbixApiV6Client;
+    /// use zabbix_api::client::ZabbixApiClient;
+    ///
+    /// #[derive(Serialize)]
+    /// struct Filter {
+    ///   pub host: Vec<String>
+    /// }
+    ///
+    /// let request = GetHostsRequest {
+    ///     filter: Filter {
+    ///     host: vec!["srv-1203".to_string()],
+    ///   },
+    /// };
+    ///
+    /// let http_client = Client::new();
+    ///
+    /// let client = ZabbixApiV6Client::new(http_client, "http://your-zabbix/api_jsonrpc.php");
+    ///
+    /// let session = client.get_auth_session("Admin", "zabbix")?;
+    /// let hosts = client.get_hosts(&session, &request)?;
+    /// ```
     fn get_hosts<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHost>, ZabbixApiError>;
 
+
+    /// # get_items
+    ///
+    /// Find zabbix items.
+    ///
+    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/item/get
     fn get_items<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixItem>, ZabbixApiError>;
 
     fn get_triggers<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixTrigger>, ZabbixApiError>;
