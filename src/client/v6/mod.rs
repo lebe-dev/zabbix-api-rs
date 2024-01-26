@@ -20,6 +20,7 @@ use crate::webscenario::ZabbixWebScenario;
 
 const JSON_RPC_VERSION: &str = "2.0";
 
+/// Zabbix API Client implementation for [Zabbix API v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
 #[derive(Debug,Clone)]
 pub struct ZabbixApiV6Client {
     client: Client,
@@ -37,7 +38,11 @@ impl ZabbixApiV6Client {
 
 impl ZabbixApiClient for ZabbixApiV6Client {
 
-    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/apiinfo/version
+    /// # get_api_info
+    ///
+    /// Implements `ZabbixApiClient::get_api_info`.
+    ///
+    /// See the trait documentation for more details.
     fn get_api_info(&self) -> Result<String, ZabbixApiError> {
         let request = ZabbixApiRequest {
             jsonrpc: JSON_RPC_VERSION.to_string(),
@@ -77,6 +82,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # get_auth_session
+    ///
+    /// Implements `ZabbixApiClient::get_auth_session`.
+    ///
+    /// See the trait documentation for more details.
     fn get_auth_session(&self,  login: &str, token: &str) -> Result<String, ZabbixApiError> {
         info!("getting auth session for user '{login}'..");
 
@@ -123,6 +133,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # raw_api_call
+    ///
+    /// Implements `ZabbixApiClient::raw_api_call`.
+    ///
+    /// See the trait documentation for more details.
     fn raw_api_call<P: Serialize, R: DeserializeOwned>(&self, session: &str,
                                            method: &str, params: &P) -> Result<ZabbixApiResponse<R>, ZabbixApiError> {
         info!("call api method '{method}'..");
@@ -169,6 +184,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # get_host_groups
+    ///
+    /// Implements `ZabbixApiClient::get_host_groups`.
+    ///
+    /// See the trait documentation for more details.
     fn get_host_groups<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHostGroup>, ZabbixApiError> {
         info!("getting host groups with params");
 
@@ -216,37 +236,9 @@ impl ZabbixApiClient for ZabbixApiV6Client {
 
     /// # get_hosts
     ///
-    /// Find zabbix hosts.
+    /// Implements `ZabbixApiClient::get_hosts`.
     ///
-    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/get
-    ///
-    /// **Example:**
-    ///
-    /// ```rust
-    /// use reqwest::blocking::Client;
-    /// use zabbix_api::host::get::GetHostsRequest;
-    /// use serde::Serialize;
-    /// use zabbix_api::client::v6::ZabbixApiV6Client;
-    /// use zabbix_api::client::ZabbixApiClient;
-    ///
-    /// #[derive(Serialize)]
-    /// struct Filter {
-    ///   pub host: Vec<String>
-    /// }
-    ///
-    /// let request = GetHostsRequest {
-    ///     filter: Filter {
-    ///     host: vec!["srv-1203".to_string()],
-    ///   },
-    /// };
-    ///
-    /// let http_client = Client::new();
-    ///
-    /// let client = ZabbixApiV6Client::new(http_client, "http://your-zabbix/api_jsonrpc.php");
-    ///
-    /// let session = client.get_auth_session("Admin", "zabbix")?;
-    /// let hosts = client.get_hosts(&session, &request)?;
-    /// ```
+    /// See the trait documentation for more details.
     fn get_hosts<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHost>, ZabbixApiError> {
         info!("getting hosts with params");
 
@@ -292,6 +284,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # get_items
+    ///
+    /// Implements `ZabbixApiClient::get_items`.
+    ///
+    /// See the trait documentation for more details.
     fn get_items<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixItem>, ZabbixApiError> {
         info!("getting items with params");
 
@@ -337,6 +334,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # get_triggers
+    ///
+    /// Implements `ZabbixApiClient::get_triggers`.
+    ///
+    /// See the trait documentation for more details.
     fn get_triggers<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixTrigger>, ZabbixApiError> {
         info!("getting triggers..");
 
@@ -382,6 +384,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # get_webscenarios
+    ///
+    /// Implements `ZabbixApiClient::get_webscenarios`.
+    ///
+    /// See the trait documentation for more details.
     fn get_webscenarios<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError> {
         info!("getting web-scenarios..");
 
@@ -427,7 +434,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
-
+    /// # create_host_group
+    ///
+    /// Implements `ZabbixApiClient::create_host_group`.
+    ///
+    /// See the trait documentation for more details.
     fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError> {
         info!("creating host group '{}'..", request.name);
 
@@ -482,6 +493,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # create_host
+    ///
+    /// Implements `ZabbixApiClient::create_host`.
+    ///
+    /// See the trait documentation for more details.
     fn create_host(&self, session: &str, request: &CreateHostRequest) -> Result<u32, ZabbixApiError> {
         info!("creating host '{}'..", request.host);
 
@@ -537,6 +553,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # create_item
+    ///
+    /// Implements `ZabbixApiClient::create_item`.
+    ///
+    /// See the trait documentation for more details.
     fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError> {
         info!("creating item with key '{}' for host id {}..", request.key_, request.host_id);
 
@@ -592,6 +613,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # create_trigger
+    ///
+    /// Implements `ZabbixApiClient::create_trigger`.
+    ///
+    /// See the trait documentation for more details.
     fn create_trigger(&self, session: &str, request: &CreateTriggerRequest) -> Result<u32, ZabbixApiError> {
         info!("creating trigger '{}' with expression '{}'..", request.description, request.expression);
 
@@ -647,6 +673,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         }
     }
 
+    /// # create_webscenario
+    ///
+    /// Implements `ZabbixApiClient::create_webscenario`.
+    ///
+    /// See the trait documentation for more details.
     fn create_webscenario(&self, session: &str, request: &CreateWebScenarioRequest) -> Result<u32, ZabbixApiError> {
         info!("creating web-scenario '{}' for host id '{}'..", request.name, request.host_id);
 
@@ -716,6 +747,7 @@ mod tests {
     use crate::host::get::{GetHostGroupsRequest, GetHostsRequest};
     use crate::host::ZabbixHost;
     use crate::item::create::CreateItemRequest;
+    use crate::item::get::GetItemsRequest;
     use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
@@ -887,6 +919,62 @@ mod tests {
                     let host = hosts.first().unwrap();
 
                     assert_eq!(&host.host, &host_name2)
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("host get error: {}", e);
+                    panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn get_items_test() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name1 = get_random_string();
+            let host_name2 = get_random_string();
+            let host_name3 = get_random_string();
+            let item_name = get_random_string();
+            let item_key = format!("test{}", get_random_string());
+
+            test_env.get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name1)
+                .create_host(&host_name2)
+                .create_host(&host_name3)
+                .create_item(&item_name, &item_key);
+
+            #[derive(Serialize)]
+            struct Search {
+                pub key_: String
+            }
+
+            let request = GetItemsRequest {
+                output: "extend".to_string(),
+                with_triggers: false,
+                host_ids: test_env.latest_host_id.to_string(),
+                search: Search {
+                    key_: item_key.to_string(),
+                },
+                sort_field: "name".to_string(),
+            };
+
+            match test_env.client.get_items(&test_env.session, &request) {
+                Ok(items) => {
+                    assert_eq!(items.len(), 1);
+
+                    let item = items.first().unwrap();
+
+                    assert_eq!(&item.key_, &item_key)
                 }
                 Err(e) => {
                     if let Some(inner_source) = e.source() {
