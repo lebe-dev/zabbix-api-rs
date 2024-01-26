@@ -752,7 +752,7 @@ mod tests {
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::trigger::create::CreateTriggerRequest;
-    use crate::trigger::get::GetTriggerRequest;
+    use crate::trigger::get::GetTriggerByIdRequest;
     use crate::webscenario::create::CreateWebScenarioRequest;
     use crate::webscenario::get::GetWebScenarioByIdRequest;
     use crate::webscenario::ZabbixWebScenarioStep;
@@ -1007,7 +1007,7 @@ mod tests {
                 .create_item(&item_name, &item_key)
                 .create_trigger(&host_name, &trigger_description, &item_key);
 
-            let request = GetTriggerRequest {
+            let request = GetTriggerByIdRequest {
                 trigger_ids: test_env.latest_trigger_id.to_string(),
                 output: "extend".to_string(),
                 select_functions: "extend".to_string(),

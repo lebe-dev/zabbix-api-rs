@@ -35,7 +35,7 @@ impl GetWebScenarioByNameRequest {
     }
 }
 
-#[derive(Serialize)]
-struct WebScenarioNameFilter {
+#[derive(Serialize,Debug)]
+pub struct WebScenarioNameFilter {
     pub name: String
 }
