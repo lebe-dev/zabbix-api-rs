@@ -163,9 +163,9 @@ help:
 	@echo "Usage: make <target> <argument>"
 	@echo
 	@echo "Available targets are:"
-	@echo "  pdf                 Generate selected files in pdf and copy into ./docs"
-	@echo "  allpdf              Generate selected files in pdf and copy into vmware hgfs"
-	@echo "  test                   build and test run"
+	@echo "  pdf                    Generate selected files in pdf and copy into ./docs"
+	@echo "  allpdf                 Generate selected files in pdf and copy into vmware hgfs"
+	@echo "  tests                  build and test run"
 	@echo "  format                 run cargo fmt to format the rust code"
 	@echo "  build                  call up cargo build"
 	@echo "  examples               build all test programs in examples dir"

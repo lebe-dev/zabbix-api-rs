@@ -9,8 +9,10 @@ use crate::client::jsonrpc::{ZabbixApiRequest, ZabbixApiResponse};
 use crate::client::post::send_post_request;
 use crate::client::ZabbixApiClient;
 use crate::error::ZabbixApiError;
+use crate::host::create::{
+    CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse,
+};
 use crate::host::{ZabbixHost, ZabbixHostGroup};
-use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
 use crate::item::ZabbixItem;
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
@@ -21,23 +23,22 @@ use crate::webscenario::ZabbixWebScenario;
 const JSON_RPC_VERSION: &str = "2.0";
 
 /// Zabbix API Client implementation for [Zabbix API v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct ZabbixApiV6Client {
     client: Client,
-    api_endpoint_url: String
+    api_endpoint_url: String,
 }
 
 impl ZabbixApiV6Client {
     pub fn new(client: Client, api_endpoint_url: &str) -> ZabbixApiV6Client {
         ZabbixApiV6Client {
             client,
-            api_endpoint_url: api_endpoint_url.to_string()
+            api_endpoint_url: api_endpoint_url.to_string(),
         }
     }
 }
 
 impl ZabbixApiClient for ZabbixApiV6Client {
-
     /// # get_api_info
     ///
     /// Implements `ZabbixApiClient::get_api_info`.
@@ -47,7 +48,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
         let request = ZabbixApiRequest {
             jsonrpc: JSON_RPC_VERSION.to_string(),
             method: "apiinfo.version".to_string(),
-            params: HashMap::<String,String>::new(),
+            params: HashMap::<String, String>::new(),
             id: 1,
             auth: None,
         };
@@ -61,18 +62,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                         info!("zabbix api version: '{api_version}'");
                         Ok(api_version)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -87,7 +84,7 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::get_auth_session`.
     ///
     /// See the trait documentation for more details.
-    fn get_auth_session(&self,  login: &str, token: &str) -> Result<String, ZabbixApiError> {
+    fn get_auth_session(&self, login: &str, token: &str) -> Result<String, ZabbixApiError> {
         info!("getting auth session for user '{login}'..");
 
         let params = HashMap::from([
@@ -112,18 +109,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                         info!("auth ok");
                         Ok(session)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -138,8 +131,12 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::raw_api_call`.
     ///
     /// See the trait documentation for more details.
-    fn raw_api_call<P: Serialize, R: DeserializeOwned>(&self, session: &str,
-                                           method: &str, params: &P) -> Result<ZabbixApiResponse<R>, ZabbixApiError> {
+    fn raw_api_call<P: Serialize, R: DeserializeOwned>(
+        &self,
+        session: &str,
+        method: &str,
+        params: &P,
+    ) -> Result<ZabbixApiResponse<R>, ZabbixApiError> {
         info!("call api method '{method}'..");
 
         let request = ZabbixApiRequest {
@@ -163,18 +160,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                         info!("api method '{method}' has been successfully called");
                         Ok(response)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -189,7 +182,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::get_host_groups`.
     ///
     /// See the trait documentation for more details.
-    fn get_host_groups<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHostGroup>, ZabbixApiError> {
+    fn get_host_groups<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixHostGroup>, ZabbixApiError> {
         info!("getting host groups with params");
 
         let api_request = ZabbixApiRequest {
@@ -206,25 +203,23 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixHostGroup>>>(&response_body)?;
+                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixHostGroup>>>(
+                    &response_body,
+                )?;
 
                 match response.result {
                     Some(results) => {
                         info!("host groups found: {:?}", results);
                         Ok(results)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -239,7 +234,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::get_hosts`.
     ///
     /// See the trait documentation for more details.
-    fn get_hosts<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHost>, ZabbixApiError> {
+    fn get_hosts<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixHost>, ZabbixApiError> {
         info!("getting hosts with params");
 
         let api_request = ZabbixApiRequest {
@@ -256,25 +255,22 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixHost>>>(&response_body)?;
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixHost>>>(&response_body)?;
 
                 match response.result {
                     Some(results) => {
                         info!("hosts found: {:?}", results);
                         Ok(results)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -289,7 +285,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::get_items`.
     ///
     /// See the trait documentation for more details.
-    fn get_items<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixItem>, ZabbixApiError> {
+    fn get_items<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixItem>, ZabbixApiError> {
         info!("getting items with params");
 
         let api_request = ZabbixApiRequest {
@@ -306,25 +306,22 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixItem>>>(&response_body)?;
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixItem>>>(&response_body)?;
 
                 match response.result {
                     Some(results) => {
                         info!("hosts found: {:?}", results);
                         Ok(results)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -339,7 +336,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::get_triggers`.
     ///
     /// See the trait documentation for more details.
-    fn get_triggers<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixTrigger>, ZabbixApiError> {
+    fn get_triggers<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixTrigger>, ZabbixApiError> {
         info!("getting triggers..");
 
         let api_request = ZabbixApiRequest {
@@ -356,25 +357,22 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixTrigger>>>(&response_body)?;
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixTrigger>>>(&response_body)?;
 
                 match response.result {
                     Some(results) => {
                         info!("hosts found: {:?}", results);
                         Ok(results)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -389,7 +387,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::get_webscenarios`.
     ///
     /// See the trait documentation for more details.
-    fn get_webscenarios<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError> {
+    fn get_webscenarios<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError> {
         info!("getting web-scenarios..");
 
         let api_request = ZabbixApiRequest {
@@ -406,25 +408,23 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixWebScenario>>>(&response_body)?;
+                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixWebScenario>>>(
+                    &response_body,
+                )?;
 
                 match response.result {
                     Some(results) => {
                         info!("hosts found: {:?}", results);
                         Ok(results)
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -439,7 +439,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::create_host_group`.
     ///
     /// See the trait documentation for more details.
-    fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError> {
+    fn create_host_group(
+        &self,
+        session: &str,
+        request: &CreateHostGroupRequest,
+    ) -> Result<u32, ZabbixApiError> {
         info!("creating host group '{}'..", request.name);
 
         let api_request = ZabbixApiRequest {
@@ -456,34 +460,30 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<CreateHostGroupResponse>>(&response_body)?;
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateHostGroupResponse>>(
+                    &response_body,
+                )?;
 
                 match response.result {
                     Some(result) => {
                         info!("host group '{}' has been created", request.name);
 
                         match result.group_ids.first() {
-                            Some(id) => {
-                                id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
-                            }
+                            Some(id) => id.parse::<u32>().map_err(|_| ZabbixApiError::Error),
                             None => {
                                 error!("unexpected error, server returned empty id list");
                                 Err(ZabbixApiError::Error)
                             }
                         }
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -498,7 +498,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::create_host`.
     ///
     /// See the trait documentation for more details.
-    fn create_host(&self, session: &str, request: &CreateHostRequest) -> Result<u32, ZabbixApiError> {
+    fn create_host(
+        &self,
+        session: &str,
+        request: &CreateHostRequest,
+    ) -> Result<u32, ZabbixApiError> {
         info!("creating host '{}'..", request.host);
 
         let api_request = ZabbixApiRequest {
@@ -515,11 +519,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<CreateHostResponse>>(&response_body)?;
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<CreateHostResponse>>(&response_body)?;
 
                 match response.result {
                     Some(result) => {
-
                         info!("host '{}' has been created", request.host);
 
                         match result.host_ids.first() {
@@ -532,18 +536,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                             }
                         }
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -558,8 +558,15 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::create_item`.
     ///
     /// See the trait documentation for more details.
-    fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError> {
-        info!("creating item with key '{}' for host id {}..", request.key_, request.host_id);
+    fn create_item(
+        &self,
+        session: &str,
+        request: &CreateItemRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!(
+            "creating item with key '{}' for host id {}..",
+            request.key_, request.host_id
+        );
 
         let api_request = ZabbixApiRequest {
             jsonrpc: JSON_RPC_VERSION.to_string(),
@@ -575,11 +582,11 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<CreateItemResponse>>(&response_body)?;
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<CreateItemResponse>>(&response_body)?;
 
                 match response.result {
                     Some(result) => {
-
                         info!("item '{}' has been created", request.key_);
 
                         match result.item_ids.first() {
@@ -592,18 +599,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                             }
                         }
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -618,8 +621,15 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::create_trigger`.
     ///
     /// See the trait documentation for more details.
-    fn create_trigger(&self, session: &str, request: &CreateTriggerRequest) -> Result<u32, ZabbixApiError> {
-        info!("creating trigger '{}' with expression '{}'..", request.description, request.expression);
+    fn create_trigger(
+        &self,
+        session: &str,
+        request: &CreateTriggerRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!(
+            "creating trigger '{}' with expression '{}'..",
+            request.description, request.expression
+        );
 
         let api_request = ZabbixApiRequest {
             jsonrpc: JSON_RPC_VERSION.to_string(),
@@ -635,11 +645,12 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<CreateTriggerResponse>>(&response_body)?;
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateTriggerResponse>>(
+                    &response_body,
+                )?;
 
                 match response.result {
                     Some(result) => {
-
                         info!("trigger '{}' has been created", request.description);
 
                         match result.trigger_ids.first() {
@@ -652,18 +663,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                             }
                         }
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -678,8 +685,15 @@ impl ZabbixApiClient for ZabbixApiV6Client {
     /// Implements `ZabbixApiClient::create_webscenario`.
     ///
     /// See the trait documentation for more details.
-    fn create_webscenario(&self, session: &str, request: &CreateWebScenarioRequest) -> Result<u32, ZabbixApiError> {
-        info!("creating web-scenario '{}' for host id '{}'..", request.name, request.host_id);
+    fn create_webscenario(
+        &self,
+        session: &str,
+        request: &CreateWebScenarioRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!(
+            "creating web-scenario '{}' for host id '{}'..",
+            request.name, request.host_id
+        );
 
         let api_request = ZabbixApiRequest {
             jsonrpc: JSON_RPC_VERSION.to_string(),
@@ -695,11 +709,12 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response = serde_json::from_str::<ZabbixApiResponse<CreateWebScenarioResponse>>(&response_body)?;
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateWebScenarioResponse>>(
+                    &response_body,
+                )?;
 
                 match response.result {
                     Some(result) => {
-
                         info!("web-scenario '{}' has been created", request.name);
 
                         match result.http_test_ids.first() {
@@ -712,18 +727,14 @@ impl ZabbixApiClient for ZabbixApiV6Client {
                             }
                         }
                     }
-                    None => {
-                        match response.error {
-                            Some(error) => {
-                                error!("{:?}", error);
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
 
-                                Err(ZabbixApiError::ApiCallError {
-                                    zabbix: error,
-                                })
-                            }
-                            None => Err(ZabbixApiError::BadRequestError)
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
                         }
-                    }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
                 }
             }
             Err(e) => {
@@ -748,9 +759,9 @@ mod tests {
     use crate::host::ZabbixHost;
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequest;
-    use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
+    use crate::tests::{get_random_string, init_logging};
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerRequest;
     use crate::webscenario::create::CreateWebScenarioRequest;
@@ -785,7 +796,10 @@ mod tests {
 
             let client = ZabbixApiV6Client::new(http_client, &tests_config.zabbix_api_url);
 
-            match client.get_auth_session(&tests_config.zabbix_api_user, &tests_config.zabbix_api_password) {
+            match client.get_auth_session(
+                &tests_config.zabbix_api_user,
+                &tests_config.zabbix_api_password,
+            ) {
                 Ok(session) => assert!(session.len() > 0),
                 Err(e) => {
                     error!("error: {}", e);
@@ -805,12 +819,12 @@ mod tests {
 
             #[derive(Serialize)]
             struct Params {
-                pub filter: Filter
+                pub filter: Filter,
             }
 
             #[derive(Serialize)]
             struct Filter {
-                pub host: Vec<String>
+                pub host: Vec<String>,
             }
 
             let params = Params {
@@ -820,8 +834,10 @@ mod tests {
             };
 
             match test_env.client.raw_api_call::<Params, Vec<ZabbixHost>>(
-                &test_env.session, "host.get", &params) {
-
+                &test_env.session,
+                "host.get",
+                &params,
+            ) {
                 Ok(response) => {
                     let results = response.result.unwrap();
                     info!("{:?}", results.first().unwrap());
@@ -846,14 +862,15 @@ mod tests {
             let group_name2 = get_random_string();
             let group_name3 = get_random_string();
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host_group(&group_name2)
                 .create_host_group(&group_name3);
 
             #[derive(Serialize)]
             struct Filter {
-                pub name: Vec<String>
+                pub name: Vec<String>,
             }
 
             let request = GetHostGroupsRequest {
@@ -895,7 +912,8 @@ mod tests {
             let host_name2 = get_random_string();
             let host_name3 = get_random_string();
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host(&host_name1)
                 .create_host(&host_name2)
@@ -903,7 +921,7 @@ mod tests {
 
             #[derive(Serialize)]
             struct Filter {
-                pub host: Vec<String>
+                pub host: Vec<String>,
             }
 
             let request = GetHostsRequest {
@@ -946,7 +964,8 @@ mod tests {
             let item_name = get_random_string();
             let item_key = format!("test{}", get_random_string());
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host(&host_name1)
                 .create_host(&host_name2)
@@ -955,7 +974,7 @@ mod tests {
 
             #[derive(Serialize)]
             struct Search {
-                pub key_: String
+                pub key_: String,
             }
 
             let request = GetItemsRequest {
@@ -1001,7 +1020,8 @@ mod tests {
             let item_key = get_random_string();
             let trigger_description = get_random_string();
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host(&host_name)
                 .create_item(&item_name, &item_key)
@@ -1046,7 +1066,8 @@ mod tests {
             let trigger_description = get_random_string();
             let webscenario_name = get_random_string();
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host(&host_name)
                 .create_item(&item_name, &item_key)
@@ -1059,7 +1080,10 @@ mod tests {
                 httptest_ids: test_env.latest_webscenario_id.to_string(),
             };
 
-            match test_env.client.get_webscenarios(&test_env.session, &request) {
+            match test_env
+                .client
+                .get_webscenarios(&test_env.session, &request)
+            {
                 Ok(results) => {
                     assert_eq!(results.len(), 1);
                     let result = results.first().unwrap();
@@ -1088,9 +1112,10 @@ mod tests {
             let group_name = get_random_string();
             let host_name = get_random_string();
 
-            test_env.get_session()
-                     .create_host_group(&group_name)
-                     .create_host(&host_name);
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name);
 
             assert!(test_env.latest_host_group_id > 0);
             assert!(test_env.latest_host_id > 0);
@@ -1107,7 +1132,8 @@ mod tests {
             let group_name = get_random_string();
             let host_name = get_random_string();
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host(&host_name);
 
@@ -1125,9 +1151,7 @@ mod tests {
                 delay: "30s".to_string(),
             };
 
-            match test_env.client.create_item(
-                &test_env.session, &request
-            ) {
+            match test_env.client.create_item(&test_env.session, &request) {
                 Ok(item_id) => {
                     assert!(item_id > 0);
                 }
@@ -1156,10 +1180,11 @@ mod tests {
             let item_name = get_random_string();
             let item_key = format!("key{}", get_random_string());
 
-            test_env.get_session()
-                    .create_host_group(&group_name)
-                    .create_host(&host_name)
-                    .create_item(&item_name, &item_key);
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name)
+                .create_item(&item_name, &item_key);
 
             let trigger_description = get_random_string();
 
@@ -1172,9 +1197,7 @@ mod tests {
                 tags: vec![],
             };
 
-            match test_env.client.create_trigger(
-                &test_env.session, &request
-            ) {
+            match test_env.client.create_trigger(&test_env.session, &request) {
                 Ok(trigger_id) => assert!(trigger_id > 0),
                 Err(e) => {
                     if let Some(inner_source) = e.source() {
@@ -1198,7 +1221,8 @@ mod tests {
             let group_name = get_random_string();
             let host_name = get_random_string();
 
-            test_env.get_session()
+            test_env
+                .get_session()
                 .create_host_group(&group_name)
                 .create_host(&host_name);
 
@@ -1217,9 +1241,10 @@ mod tests {
                 steps: vec![step],
             };
 
-            match test_env.client.create_webscenario(
-                &test_env.session, &request
-            ) {
+            match test_env
+                .client
+                .create_webscenario(&test_env.session, &request)
+            {
                 Ok(web_scenario_id) => {
                     assert!(web_scenario_id > 0);
                 }
