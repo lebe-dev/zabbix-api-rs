@@ -8,7 +8,6 @@ pub mod get;
 pub struct ZabbixTrigger {
     #[serde(alias = "triggerid")]
     pub trigger_id: String,
-    #[serde(alias = "description")]
     pub description: String,
     pub expression: String
 }
