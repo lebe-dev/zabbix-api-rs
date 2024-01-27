@@ -10,7 +10,7 @@ Add dependencies:
 ```toml
 [dependencies]
 reqwest = { version = "0.11.23", features = ["blocking", "json"] }
-zabbix-api = "0.2.0"
+zabbix-api = "0.1.0"
 ```
 
 Then use:
@@ -21,7 +21,6 @@ use crate::client::v6::ZabbixApiV6Client;
 use crate::client::ZabbixApiClient;
 
 fn main() {
-  
   let http_client = ClientBuilder::new()
                                 .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
                                 .build().unwrap();
@@ -39,6 +38,11 @@ fn main() {
 ```
 
 - You can make [raw api calls](src/client/v6/mod.rs#L113).
+
+## Versions
+
+- Stable: `0.1.0`
+- Dev: `0.2.0`
 
 ## API Methods
 
