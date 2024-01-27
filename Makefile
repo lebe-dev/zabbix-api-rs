@@ -111,7 +111,7 @@ args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 	@:
 
 status:
-	git status
+	git status && git branch
 commit:
 	git commit -am "$(call args, Automated commit message without details, Please read the git diff)"  && git push
 pull:
@@ -160,6 +160,16 @@ hello:
 	rm -f ${HOME}/.cargo/bin/hello
 	(cd docs/examples/hello && cargo install --path . -f )
 	ls -lrt ${HOME}/.cargo/bin | tail -3
+sdockerup:
+	 docker-compose up -d
+dockerdown:
+	 docker-compose down
+docker:
+	docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | egrep 'zabbix|NAMES'
+
+itest:
+	ncat -zv localhost 3080
+	./run-integration-tests.sh
 help:
 	@echo "Usage: make <target> <argument>"
 	@echo
