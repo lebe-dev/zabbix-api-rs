@@ -54,10 +54,12 @@ pub trait ZabbixApiClient {
     ///
     /// let http_client = Client::new();
     ///
-    /// let client = ZabbixApiV6Client::new(http_client, "http://your-zabbix/api_jsonrpc.php");
+    /// let zabbix_server = env!("ZABBIX_API_URL");
     ///
-    /// let session = client.get_auth_session("Admin", "zabbix")?;
-    /// let hosts = client.get_hosts(&session, &request)?;
+    /// let client = ZabbixApiV6Client::new(http_client, &zabbix_server);
+    ///
+    /// let session = client.get_auth_session("Admin", "zabbix").unwrap();
+    /// let hosts = client.get_hosts(&session, &request).unwrap();
     /// ```
     fn get_hosts<P: Serialize>(&self, session: &str, params: &P) -> Result<Vec<ZabbixHost>, ZabbixApiError>;
 
