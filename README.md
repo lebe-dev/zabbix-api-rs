@@ -5,7 +5,7 @@ Due to the extensive nature of the Zabbix API, I have been unable to allocate su
 
 ## Getting started
 
-Add dependencies:
+Add dependencies in your Cargo.toml :
 
 ```toml
 [dependencies]
@@ -17,13 +17,13 @@ Then use:
 
 ```rust
 use reqwest::blocking::ClientBuilder;
-use crate::client::v6::ZabbixApiV6Client;
-use crate::client::ZabbixApiClient;
+use zabbix_api::client::v6::ZabbixApiV6Client;
+use zabbix_api::client::ZabbixApiClient;
 
 fn main() {
   let http_client = ClientBuilder::new()
-                                .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
-                                .build().unwrap();
+       .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
+       .build().unwrap();
 
   let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
     
