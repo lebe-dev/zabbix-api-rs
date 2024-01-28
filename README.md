@@ -42,7 +42,7 @@ fn main() {
 ## Versions
 
 - Stable: `0.2.0`
-- Dev: `0.3.0`
+- Dev: `0.2.1`
 
 ## API Methods
 
