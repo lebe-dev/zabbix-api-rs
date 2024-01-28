@@ -1,6 +1,6 @@
 [package]
 name = "zabbix-api"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Eugene Lebedev <eugene.0x90@gmail.com>"]
 edition = "2021"
 description = "Zabbix API client"
@@ -14,8 +14,8 @@ categories = ["api-bindings"]
 [dependencies]
 thiserror = "1.0.56"
 
-serde = { version = "1.0.195", features = ["derive"] }
-serde_json = "1.0.111"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.112"
 
 reqwest = { version = "0.11.23", features = ["blocking", "json"] }
 
@@ -23,4 +23,4 @@ log = "0.4.20"
 
 [dev-dependencies]
 env_logger = "0.9.3"
-fake = "2.9.1"
+fake = "2.9.2"
