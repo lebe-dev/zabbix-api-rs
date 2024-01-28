@@ -77,6 +77,57 @@ pub trait ZabbixApiClient {
 
     fn create_host_group(&self, session: &str, request: &CreateHostGroupRequest) -> Result<u32, ZabbixApiError>;
 
+    /// # create_host
+    ///
+    /// Create zabbix host.
+    ///
+    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use fake::{Fake, Faker};
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::host::get::{GetHostGroupsRequest, GetHostsRequest};
+    /// use serde::Serialize;
+    /// use zabbix_api::client::v6::ZabbixApiV6Client;
+    /// use zabbix_api::client::ZabbixApiClient;
+    /// use zabbix_api::host::create::{CreateHostGroupRequest, CreateHostRequest};
+    /// use zabbix_api::ZABBIX_EXTEND_PROPERTY_VALUE;
+    ///
+    /// let http_client = Client::new();
+    ///
+    /// let zabbix_server = env!("ZABBIX_API_URL");
+    ///
+    /// let client = ZabbixApiV6Client::new(http_client, &zabbix_server);
+    ///
+    /// let session = client.get_auth_session("Admin", "zabbix").unwrap();
+    ///
+    /// let filter: HashMap<String,String> = HashMap::new();
+    ///
+    /// let request = GetHostGroupsRequest {
+    ///     output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
+    ///     filter
+    /// };
+    ///
+    /// let host_groups = client.get_host_groups(&session, &request).unwrap();
+    /// let host_group = host_groups.first().unwrap().clone();
+    /// let host_name = Faker.fake::<String>();
+    ///
+    /// let request = CreateHostRequest {
+    ///     host: host_name,
+    ///     groups: vec![host_group],
+    ///     interfaces: vec![],
+    ///     tags: vec![],
+    ///     templates: vec![],
+    ///     macros: vec![],
+    ///     inventory_mode: 0,
+    ///     inventory: Default::default(),
+    /// };
+    ///
+    /// client.create_host(&session, &request).unwrap();
+    /// ```
     fn create_host(&self, session: &str, request: &CreateHostRequest) -> Result<u32, ZabbixApiError>;
 
     fn create_item(&self, session: &str, request: &CreateItemRequest) -> Result<u32, ZabbixApiError>;
