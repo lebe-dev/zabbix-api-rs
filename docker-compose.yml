@@ -42,7 +42,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_bin
       - --default-authentication-plugin=mysql_native_password
-    volumes:
-      - ./data:/var/lib/mysql:rw
+    #volumes:
+    #  - ./data:/var/lib/mysql:rw
     env_file:
       - ./.env_db_mysql
