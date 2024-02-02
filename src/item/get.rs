@@ -35,7 +35,7 @@ impl GetItemsRequestByKey<SearchByKey> {
             search: SearchByKey {
                 key_: key.to_string(),
             },
-            sort_field: "key".to_string(),
+            sort_field: "name".to_string(),
         }
     }
 }
