@@ -747,7 +747,7 @@ mod tests {
     use crate::host::get::{GetHostGroupsRequest, GetHostsRequest};
     use crate::host::ZabbixHost;
     use crate::item::create::CreateItemRequest;
-    use crate::item::get::GetItemsRequest;
+    use crate::item::get::GetItemsRequestById;
     use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
@@ -959,7 +959,7 @@ mod tests {
                 pub key_: String
             }
 
-            let request = GetItemsRequest {
+            let request = GetItemsRequestById {
                 output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
                 with_triggers: false,
                 host_ids: test_env.latest_host_id.to_string(),
