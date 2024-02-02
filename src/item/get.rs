@@ -21,3 +21,21 @@ pub struct GetItemsRequestByKey<R> {
     #[serde(rename = "sortfield")]
     pub sort_field: String
 }
+
+#[derive(Serialize,Debug)]
+pub struct SearchByKey {
+    pub key_: String,
+}
+
+impl GetItemsRequestByKey<SearchByKey> {
+    pub fn new(key: &str) -> GetItemsRequestByKey<SearchByKey> {
+        GetItemsRequestByKey {
+            output: "".to_string(),
+            with_triggers: false,
+            search: SearchByKey {
+                key_: key.to_string(),
+            },
+            sort_field: "".to_string(),
+        }
+    }
+}
