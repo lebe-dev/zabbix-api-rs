@@ -5,7 +5,6 @@
 Install docker then start fresh Zabbix Server:
 
 ```shell
-rm -rf data
 docker-compose up -d
 ```
 
