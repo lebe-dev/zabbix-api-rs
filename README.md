@@ -5,12 +5,12 @@ Due to the extensive nature of the Zabbix API, I have been unable to allocate su
 
 ## Getting started
 
-Add dependencies in your Cargo.toml :
+Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-reqwest = { version = "0.11.23", features = ["blocking", "json"] }
-zabbix-api = "0.2.0"
+reqwest = { version = "0.12.7", features = ["blocking", "json"] }
+zabbix-api = "0.2.2"
 ```
 
 Then use:
@@ -41,8 +41,8 @@ fn main() {
 
 ## Versions
 
-- Stable: `0.2.0`
-- Dev: `0.2.1`
+- Stable: `0.2.2`
+- Dev: `0.2.3`
 
 ## API Methods
 
