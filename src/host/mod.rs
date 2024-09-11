@@ -4,7 +4,7 @@ pub mod create;
 pub mod get;
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/object
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize,PartialEq,Debug)]
 pub struct ZabbixHost {
     #[serde(rename = "hostid")]
     pub host_id: String,
@@ -12,14 +12,14 @@ pub struct ZabbixHost {
 }
 
 // API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/object#host-tag
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize,PartialEq,Debug)]
 pub struct ZabbixHostTag {
     pub tag: String,
     pub value: String
 }
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/hostinterface/object
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize,PartialEq,Debug)]
 pub struct ZabbixHostInterface {
     pub r#type: u8,
 
@@ -34,7 +34,7 @@ pub struct ZabbixHostInterface {
 }
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/hostgroup/object
-#[derive(Serialize,Deserialize,Clone,Debug)]
+#[derive(Serialize,Deserialize,PartialEq,Clone,Debug)]
 pub struct ZabbixHostGroup {
     pub name: String,
     #[serde(rename = "groupid")]
