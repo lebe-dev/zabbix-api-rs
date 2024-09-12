@@ -9,8 +9,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-reqwest = { version = "0.12.7", features = ["blocking", "json"] }
-zabbix-api = "0.2.2"
+zabbix-api = "0.3.0"
 ```
 
 Then use:
