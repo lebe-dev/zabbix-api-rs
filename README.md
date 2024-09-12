@@ -9,7 +9,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = "0.3.0"
+zabbix-api = "0.3.1"
 ```
 
 Then use:
