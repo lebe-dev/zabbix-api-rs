@@ -151,6 +151,11 @@ impl TestEnvBuilder {
         let params = CreateTriggerRequest {
             description: description.to_string(),
             expression: expression.to_string(),
+            priority: 4,
+            recovery_mode: 0,
+            recovery_expression: "".to_string(),
+            url: "".to_string(),
+            event_name: "".to_string(),
             dependencies: vec![],
             tags: vec![],
         };

@@ -9,8 +9,8 @@ use crate::client::jsonrpc::{ZabbixApiRequest, ZabbixApiResponse};
 use crate::client::post::send_post_request;
 use crate::client::ZabbixApiClient;
 use crate::error::ZabbixApiError;
-use crate::host::{ZabbixHost, ZabbixHostGroup};
 use crate::host::create::{CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse};
+use crate::host::{ZabbixHost, ZabbixHostGroup};
 use crate::item::create::{CreateItemRequest, CreateItemResponse};
 use crate::item::ZabbixItem;
 use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
@@ -748,9 +748,9 @@ mod tests {
     use crate::host::ZabbixHost;
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequestById;
-    use crate::tests::{get_random_string, init_logging};
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
+    use crate::tests::{get_random_string, init_logging};
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerByIdRequest;
     use crate::webscenario::create::CreateWebScenarioRequest;
@@ -1169,6 +1169,11 @@ mod tests {
             let request = CreateTriggerRequest {
                 description: trigger_description,
                 expression: expression.to_string(),
+                priority: 4,
+                recovery_mode: 0,
+                recovery_expression: "".to_string(),
+                url: "".to_string(),
+                event_name: "".to_string(),
                 dependencies: vec![],
                 tags: vec![],
             };
