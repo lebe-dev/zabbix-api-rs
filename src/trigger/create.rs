@@ -7,10 +7,19 @@ pub struct CreateTriggerRequest {
     pub description: String,
     pub expression: String,
     pub priority: u8,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub recovery_mode: Option<u8>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub recovery_expression: Option<String>,
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub event_name: Option<String>,
+
     pub dependencies: Vec<ZabbixTriggerDependency>,
     pub tags: Vec<ZabbixTriggerTag>
 }
