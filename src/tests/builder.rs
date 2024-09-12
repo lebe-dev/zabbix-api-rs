@@ -145,9 +145,7 @@ impl TestEnvBuilder {
         }
     }
 
-    pub fn create_trigger(&mut self, host_name: &str, description: &str, item_key: &str) -> &mut Self {
-        let expression = format!("last(/{host_name}/{item_key})=0");
-
+    pub fn create_trigger(&mut self, description: &str, expression: &str) -> &mut Self {
         let params = CreateTriggerRequest {
             description: description.to_string(),
             expression: expression.to_string(),

@@ -1006,7 +1006,7 @@ mod tests {
                 .create_host_group(&group_name)
                 .create_host(&host_name)
                 .create_item(&item_name, &item_key)
-                .create_trigger(&host_name, &trigger_description, &item_key);
+                .create_trigger(&trigger_description, &format!("last(/{host_name}/{item_key})=0"));
 
             let request = GetTriggerByIdRequest {
                 trigger_ids: test_env.latest_trigger_id.to_string(),
@@ -1051,7 +1051,7 @@ mod tests {
                 .create_host_group(&group_name)
                 .create_host(&host_name)
                 .create_item(&item_name, &item_key)
-                .create_trigger(&host_name, &trigger_description, &item_key)
+                .create_trigger(&trigger_description, &format!("last(/{host_name}/{item_key})=0"))
                 .create_web_scenario(&webscenario_name);
 
             let request = GetWebScenarioByIdRequest {
