@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::trigger::ZabbixTriggerTag;
 
-#[derive(Serialize)]
+#[derive(Serialize,Debug,Clone)]
 pub struct CreateTriggerRequest {
     pub description: String,
     pub expression: String,
@@ -15,13 +15,13 @@ pub struct CreateTriggerRequest {
     pub tags: Vec<ZabbixTriggerTag>
 }
 
-#[derive(Serialize)]
+#[derive(Serialize,Debug,Clone)]
 pub struct ZabbixTriggerDependency {
     #[serde(alias = "triggerid")]
     pub trigger_id: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Debug,Clone)]
 pub struct CreateTriggerResponse {
     #[serde(rename = "triggerids")]
     pub trigger_ids: Vec<String>
