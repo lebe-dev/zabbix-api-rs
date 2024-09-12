@@ -7,10 +7,10 @@ pub struct CreateTriggerRequest {
     pub description: String,
     pub expression: String,
     pub priority: u8,
-    pub recovery_mode: u8,
-    pub recovery_expression: String,
-    pub url: String,
-    pub event_name: String,
+    pub recovery_mode: Option<u8>,
+    pub recovery_expression: Option<String>,
+    pub url: Option<String>,
+    pub event_name: Option<String>,
     pub dependencies: Vec<ZabbixTriggerDependency>,
     pub tags: Vec<ZabbixTriggerTag>
 }
