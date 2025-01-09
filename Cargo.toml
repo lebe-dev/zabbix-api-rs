@@ -1,6 +1,6 @@
 [package]
 name = "zabbix-api"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Eugene Lebedev <eugene.0x90@gmail.com>"]
 edition = "2021"
 description = "Zabbix API client"
@@ -20,6 +20,7 @@ serde_json = "1.0.128"
 reqwest = { version = "0.12.7", features = ["blocking", "json"] }
 
 log = "0.4.22"
+serde_with = "3.12.0"
 
 [dev-dependencies]
 env_logger = "0.11.5"
