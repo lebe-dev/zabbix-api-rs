@@ -1,6 +1,6 @@
 # Zabbix API
 
-This is a partial implementation of the Zabbix API client, created specifically for my pet project, [wszl](https://github.com/tinyops-ru/zabbix-lld-ws). 
+This is a partial implementation of the Zabbix API client, created specifically for my pet project, [wszl](https://github.com/tinyops-ru/zabbix-lld-ws).
 Due to the extensive nature of the Zabbix API, I have been unable to allocate sufficient time to cover 100% functionality.
 
 ## Getting started
@@ -9,7 +9,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = "0.3.1"
+zabbix-api = "0.3.2"
 ```
 
 Then use:
@@ -25,7 +25,7 @@ fn main() {
        .build().unwrap();
 
   let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
-    
+
   match client.get_auth_session("Admin", "zabbix") {
     Ok(session) => println!("session: {session}"),
     Err(e) => {
@@ -37,11 +37,6 @@ fn main() {
 ```
 
 - You can make [raw api calls](src/client/v6/mod.rs#L113).
-
-## Versions
-
-- Stable: `0.2.2`
-- Dev: `0.2.3`
 
 ## API Methods
 
