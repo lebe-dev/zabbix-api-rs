@@ -9,7 +9,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = "0.3.2"
+zabbix-api = "0.4.0"
 ```
 
 Then use:
@@ -67,5 +67,6 @@ fn main() {
 
 ## Limitations
 
+- API support: [v7](https://www.zabbix.com/documentation/7.0/en/manual/api)
 - API support: [v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
 - Synchronous requests only
