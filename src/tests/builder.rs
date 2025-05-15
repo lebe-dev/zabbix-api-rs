@@ -1,19 +1,20 @@
 use std::collections::HashMap;
 use std::error::Error;
 
+use crate::client::client::ZabbixApiClient;
+use crate::client::v6::client::ZabbixApiV6Client;
+use crate::host::model::ZabbixHostGroup;
+use crate::webscenario::model::ZabbixWebScenarioStep;
 use log::error;
 use reqwest::blocking::Client;
 
-use crate::client::v6::ZabbixApiV6Client;
-use crate::client::ZabbixApiClient;
 use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
-use crate::host::ZabbixHostGroup;
 use crate::item::create::CreateItemRequest;
-use crate::tests::init_logging;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
 use crate::webscenario::create::CreateWebScenarioRequest;
-use crate::webscenario::ZabbixWebScenarioStep;
+
+use super::logging::init_logging;
 
 pub struct TestEnvBuilder {
     pub client: ZabbixApiV6Client,
@@ -24,7 +25,7 @@ pub struct TestEnvBuilder {
     pub latest_host_id: u32,
     pub latest_item_id: u32,
     pub latest_trigger_id: u32,
-    pub latest_webscenario_id: u32
+    pub latest_webscenario_id: u32,
 }
 
 impl TestEnvBuilder {
@@ -50,12 +51,12 @@ impl TestEnvBuilder {
     pub fn get_session(&mut self) -> &mut Self {
         match self.client.get_auth_session(
             &self.integration_tests_config.zabbix_api_user,
-            &self.integration_tests_config.zabbix_api_password
+            &self.integration_tests_config.zabbix_api_password,
         ) {
             Ok(session) => {
                 self.session = session;
                 self
-            },
+            }
             Err(e) => {
                 error!("auth error: {}", e);
                 panic!("{}", e)
@@ -87,12 +88,10 @@ impl TestEnvBuilder {
     pub fn create_host(&mut self, name: &str) -> &mut Self {
         let params = CreateHostRequest {
             host: name.to_string(),
-            groups: vec![
-                ZabbixHostGroup {
-                    name: "".to_string(),
-                    group_id: self.latest_host_group_id.to_string(),
-                }
-            ],
+            groups: vec![ZabbixHostGroup {
+                name: "".to_string(),
+                group_id: self.latest_host_group_id.to_string(),
+            }],
             interfaces: vec![],
             tags: vec![],
             templates: vec![],

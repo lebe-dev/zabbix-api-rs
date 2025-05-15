@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::host::ZabbixHostTag;
+use crate::host::model::ZabbixHostTag;
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/item/create
-#[derive(Serialize,Debug)]
+#[derive(Serialize, Debug)]
 pub struct CreateItemRequest {
     pub name: String,
     pub key_: String,
@@ -14,12 +14,12 @@ pub struct CreateItemRequest {
     #[serde(rename = "interfaceid")]
     pub interface_id: String,
     pub tags: Vec<ZabbixHostTag>,
-    pub delay: String
+    pub delay: String,
 }
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/item/create
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize, Debug)]
 pub struct CreateItemResponse {
     #[serde(rename = "itemids")]
-    pub item_ids: Vec<String>
+    pub item_ids: Vec<String>,
 }

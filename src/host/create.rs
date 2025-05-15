@@ -2,24 +2,24 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::host::{ZabbixHostGroup, ZabbixHostInterface, ZabbixHostTag};
-use crate::r#macro::ZabbixHostMacro;
-use crate::template::ZabbixTemplate;
+use crate::{r#macro::model::ZabbixHostMacro, template::model::ZabbixTemplate};
+
+use super::model::{ZabbixHostGroup, ZabbixHostInterface, ZabbixHostTag};
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/hostgroup/create
-#[derive(Serialize,Debug)]
+#[derive(Serialize, Debug)]
 pub struct CreateHostGroupRequest {
-    pub name: String
+    pub name: String,
 }
 
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize, Debug)]
 pub struct CreateHostGroupResponse {
     #[serde(rename = "groupids")]
-    pub group_ids: Vec<String>
+    pub group_ids: Vec<String>,
 }
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/create
-#[derive(Serialize,Debug)]
+#[derive(Serialize, Debug)]
 pub struct CreateHostRequest {
     pub host: String,
     pub groups: Vec<ZabbixHostGroup>,
@@ -28,11 +28,11 @@ pub struct CreateHostRequest {
     pub templates: Vec<ZabbixTemplate>,
     pub macros: Vec<ZabbixHostMacro>,
     pub inventory_mode: u8,
-    pub inventory: HashMap<String, String>
+    pub inventory: HashMap<String, String>,
 }
 
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize, Debug)]
 pub struct CreateHostResponse {
     #[serde(rename = "hostids")]
-    pub host_ids: Vec<String>
+    pub host_ids: Vec<String>,
 }
