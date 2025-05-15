@@ -6,8 +6,8 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 
 use crate::client::client::ZabbixApiClient;
-use crate::client::jsonrpc::{ZabbixApiRequest, ZabbixApiResponse};
 use crate::client::post::send_post_request;
+use crate::client::response::ZabbixApiResponse;
 use crate::error::ZabbixApiError;
 use crate::host::create::{
     CreateHostGroupRequest, CreateHostGroupResponse, CreateHostRequest, CreateHostResponse,
@@ -19,6 +19,8 @@ use crate::trigger::create::{CreateTriggerRequest, CreateTriggerResponse};
 use crate::trigger::model::ZabbixTrigger;
 use crate::webscenario::create::{CreateWebScenarioRequest, CreateWebScenarioResponse};
 use crate::webscenario::model::ZabbixWebScenario;
+
+use super::request::ZabbixApiRequest;
 
 const JSON_RPC_VERSION: &str = "2.0";
 

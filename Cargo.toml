@@ -11,6 +11,11 @@ readme = "README.md"
 keywords = ["zabbix", "api"]
 categories = ["api-bindings"]
 
+[features]
+default = ["v7", "v6"]
+v7 = []
+v6 = []
+
 [dependencies]
 thiserror = "2.0.12"
 

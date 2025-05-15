@@ -10,7 +10,7 @@ use crate::trigger::model::ZabbixTrigger;
 use crate::webscenario::create::CreateWebScenarioRequest;
 use crate::webscenario::model::ZabbixWebScenario;
 
-use super::jsonrpc::ZabbixApiResponse;
+use super::response::ZabbixApiResponse;
 
 pub trait ZabbixApiClient {
     /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/apiinfo/version
