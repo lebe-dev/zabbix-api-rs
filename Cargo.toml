@@ -14,14 +14,14 @@ categories = ["api-bindings"]
 [dependencies]
 thiserror = "2.0.12"
 
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = "1.0.128"
-
-reqwest = { version = "0.12.7", features = ["blocking", "json"] }
-
-log = "0.4.22"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 serde_with = "3.12.0"
 
+reqwest = { version = "0.12.15", features = ["blocking", "json"] }
+
+log = "0.4.27"
+
 [dev-dependencies]
-env_logger = "0.11.5"
-fake = "2.9.2"
+env_logger = "0.11.8"
+fake = "4.3.0"
