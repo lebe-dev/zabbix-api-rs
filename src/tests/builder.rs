@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use std::error::Error;
 
-use crate::client::client::ZabbixApiClient;
-use crate::client::v6::client::ZabbixApiV6Client;
+use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
 use crate::host::model::ZabbixHostGroup;
 use crate::webscenario::model::ZabbixWebScenarioStep;
 use log::error;
@@ -17,7 +16,7 @@ use crate::webscenario::create::CreateWebScenarioRequest;
 use super::logging::init_logging;
 
 pub struct TestEnvBuilder {
-    pub client: ZabbixApiV6Client,
+    pub client: ZabbixApiClientImpl,
     pub integration_tests_config: IntegrationTestsConfig,
     pub session: String,
 
@@ -37,7 +36,7 @@ impl TestEnvBuilder {
         let tests_config = get_integration_tests_config();
 
         TestEnvBuilder {
-            client: ZabbixApiV6Client::new(http_client, &tests_config.zabbix_api_url),
+            client: ZabbixApiClientImpl::new(http_client, &tests_config.zabbix_api_url),
             integration_tests_config: tests_config,
             session: "".to_string(),
             latest_host_group_id: 0,
