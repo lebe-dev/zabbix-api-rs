@@ -154,7 +154,7 @@ pub trait ZabbixApiClient {
     ///
     /// let request = CreateHostRequest {
     ///     host: host_name,
-    ///     groups: vec![host_group],
+    ///     groups: vec![host_group.into()],
     ///     interfaces: vec![],
     ///     tags: vec![],
     ///     templates: vec![],

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{r#macro::model::ZabbixHostMacro, template::model::ZabbixTemplate};
 
-use super::model::{ZabbixHostGroup, ZabbixHostInterface, ZabbixHostTag};
+use super::model::{ZabbixHostGroupId, ZabbixHostInterface, ZabbixHostTag};
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/hostgroup/create
 #[derive(Serialize, Debug)]
@@ -22,7 +22,7 @@ pub struct CreateHostGroupResponse {
 #[derive(Serialize, Debug)]
 pub struct CreateHostRequest {
     pub host: String,
-    pub groups: Vec<ZabbixHostGroup>,
+    pub groups: Vec<ZabbixHostGroupId>,
     pub interfaces: Vec<ZabbixHostInterface>,
     pub tags: Vec<ZabbixHostTag>,
     pub templates: Vec<ZabbixTemplate>,

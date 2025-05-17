@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
-use crate::host::model::ZabbixHostGroup;
+use crate::host::model::ZabbixHostGroupId;
 use crate::webscenario::model::ZabbixWebScenarioStep;
 use log::error;
 use reqwest::blocking::Client;
@@ -21,6 +21,7 @@ pub struct TestEnvBuilder {
     pub session: String,
 
     pub latest_host_group_id: u32,
+    pub latest_host_group_name: String,
     pub latest_host_id: u32,
     pub latest_item_id: u32,
     pub latest_trigger_id: u32,
@@ -40,6 +41,7 @@ impl TestEnvBuilder {
             integration_tests_config: tests_config,
             session: "".to_string(),
             latest_host_group_id: 0,
+            latest_host_group_name: "".to_string(),
             latest_host_id: 0,
             latest_item_id: 0,
             latest_trigger_id: 0,
@@ -70,6 +72,7 @@ impl TestEnvBuilder {
 
         match &self.client.create_host_group(&self.session, &request) {
             Ok(host_group_id) => {
+                self.latest_host_group_name = name.to_string();
                 self.latest_host_group_id = host_group_id.to_owned();
                 self
             }
@@ -87,8 +90,7 @@ impl TestEnvBuilder {
     pub fn create_host(&mut self, name: &str) -> &mut Self {
         let params = CreateHostRequest {
             host: name.to_string(),
-            groups: vec![ZabbixHostGroup {
-                name: "".to_string(),
+            groups: vec![ZabbixHostGroupId {
                 group_id: self.latest_host_group_id.to_string(),
             }],
             interfaces: vec![],

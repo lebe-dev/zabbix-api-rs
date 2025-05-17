@@ -37,3 +37,17 @@ pub struct ZabbixHostGroup {
     #[serde(rename = "groupid")]
     pub group_id: String,
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
+pub struct ZabbixHostGroupId {
+    #[serde(rename = "groupid")]
+    pub group_id: String,
+}
+
+impl From<ZabbixHostGroup> for ZabbixHostGroupId {
+    fn from(value: ZabbixHostGroup) -> Self {
+        ZabbixHostGroupId {
+            group_id: value.group_id,
+        }
+    }
+}
