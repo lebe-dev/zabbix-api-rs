@@ -18,6 +18,7 @@ use crate::item::model::ZabbixItem;
 use crate::trigger::create::CreateTriggerRequest;
 use crate::trigger::create::CreateTriggerResponse;
 use crate::trigger::model::ZabbixTrigger;
+use crate::usergroup::model::{CreateUserGroupRequest, CreateUserGroupResponse};
 use crate::webscenario::create::CreateWebScenarioRequest;
 use crate::webscenario::create::CreateWebScenarioResponse;
 use crate::webscenario::model::ZabbixWebScenario;
@@ -187,6 +188,12 @@ pub trait ZabbixApiClient {
         &self,
         session: &str,
         request: &CreateWebScenarioRequest,
+    ) -> Result<u32, ZabbixApiError>;
+
+    fn create_user_group(
+        &self,
+        session: &str,
+        request: &CreateUserGroupRequest,
     ) -> Result<u32, ZabbixApiError>;
 }
 
@@ -874,6 +881,63 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
             }
         }
     }
+
+    /// # create_user_group
+    ///
+    /// Implements `ZabbixApiClient::create_user_group`.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/usergroup/create
+    fn create_user_group(
+        &self,
+        session: &str,
+        request: &CreateUserGroupRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!("creating user group '{}'..", request.name);
+
+        let api_request = get_api_request("usergroup.create", request, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response = serde_json::from_str::<ZabbixApiResponse<CreateUserGroupResponse>>(
+                    &response_body,
+                )?;
+
+                match response.result {
+                    Some(result) => {
+                        info!("user group '{}' has been created", request.name);
+
+                        match result.user_group_ids.first() {
+                            Some(id) => id.parse::<u32>().map_err(|_| ZabbixApiError::Error),
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -895,6 +959,7 @@ mod tests {
     use crate::tests::strings::get_random_string;
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerByIdRequest;
+    use crate::usergroup::model::{CreateUserGroupRequest, UserGroupPermission, UserGroupUser};
     use crate::webscenario::create::CreateWebScenarioRequest;
     use crate::webscenario::get::GetWebScenarioByIdRequest;
     use crate::webscenario::model::ZabbixWebScenarioStep;
@@ -1400,6 +1465,61 @@ mod tests {
 
                     error!("web-scenario create error: {}", e);
                     panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn create_user_group() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+            test_env.get_session();
+
+            let group_name = get_random_string();
+            let user_group_name = format!("user_group_{}", get_random_string());
+
+            // Create a host group to assign permissions to
+            test_env.create_host_group(&group_name);
+            let host_group_id = test_env.latest_host_group_id.to_string();
+
+            // A dummy user ID (replace with a real one if needed for more thorough testing)
+            // For this test, Zabbix might not validate the user ID existence strictly for group creation.
+            let user_id = "1"; // Assuming user with ID '1' (Admin) exists or is not strictly checked
+
+            let request = CreateUserGroupRequest {
+                name: user_group_name.clone(),
+                gui_access: Some(0), // System default
+                users_status: Some(0), // Enabled
+                hostgroup_rights: Some(vec![UserGroupPermission {
+                    id: host_group_id,
+                    permission: 2, // Read-only
+                }]),
+                users: Some(vec![UserGroupUser {
+                    user_id: user_id.to_string(),
+                }]),
+                ..Default::default()
+            };
+
+            match test_env
+                .client
+                .create_user_group(&test_env.session, &request)
+            {
+                Ok(user_group_id) => {
+                    assert!(user_group_id > 0);
+                    info!(
+                        "Successfully created user group '{}' with ID '{}'",
+                        user_group_name, user_group_id
+                    );
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+                    error!("user group create error: {}", e);
+                    panic!("{}", e);
                 }
             }
         }
