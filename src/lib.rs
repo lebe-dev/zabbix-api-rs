@@ -9,6 +9,7 @@ pub mod hostgroup;
 #[cfg(feature = "item")]
 pub mod item;
 
+#[cfg(feature = "trigger")]
 pub mod trigger;
 
 pub mod webscenario;

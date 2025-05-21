@@ -101,6 +101,7 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixItem>, ZabbixApiError>;
 
+    #[cfg(feature = "trigger")]
     fn get_triggers<P: Serialize>(
         &self,
         session: &str,
@@ -187,6 +188,7 @@ pub trait ZabbixApiClient {
         request: &CreateItemRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    #[cfg(feature = "trigger")]
     fn create_trigger(
         &self,
         session: &str,
