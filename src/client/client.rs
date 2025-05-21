@@ -8,10 +8,11 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::client::request::get_api_request;
 use crate::error::ZabbixApiError;
-use crate::host::create::CreateHostGroupResponse;
+use crate::host::create::CreateHostRequest;
 use crate::host::create::CreateHostResponse;
-use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
-use crate::host::model::{ZabbixHost, ZabbixHostGroup};
+use crate::host::model::ZabbixHost;
+use crate::hostgroup::create::CreateHostGroupRequest;
+use crate::hostgroup::model::ZabbixHostGroup;
 use crate::item::create::CreateItemRequest;
 use crate::item::create::CreateItemResponse;
 use crate::item::model::ZabbixItem;
@@ -39,6 +40,7 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<ZabbixApiResponse<R>, ZabbixApiError>;
 
+    #[cfg(feature = "host")]
     fn get_host_groups<P: Serialize>(
         &self,
         session: &str,
@@ -110,6 +112,7 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError>;
 
+    #[cfg(feature = "host")]
     fn create_host_group(
         &self,
         session: &str,
@@ -120,7 +123,7 @@ pub trait ZabbixApiClient {
     ///
     /// Create zabbix host.
     ///
-    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/create
+    /// API: https://www.zabbix.com/documentation/7.0/en/manual/api/reference/host/create
     ///
     /// **Example:**
     ///
@@ -128,11 +131,13 @@ pub trait ZabbixApiClient {
     /// use std::collections::HashMap;
     /// use fake::{Fake, Faker};
     /// use reqwest::blocking::Client;
-    /// use zabbix_api::host::get::{GetHostGroupsRequest, GetHostsRequest};
+    /// use zabbix_api::host::get::GetHostsRequest;
+    /// use zabbix_api::hostgroup::get::GetHostGroupsRequest;
     /// use serde::Serialize;
     /// use zabbix_api::client::client::ZabbixApiClientImpl;
     /// use zabbix_api::client::client::ZabbixApiClient;
-    /// use zabbix_api::host::create::{CreateHostGroupRequest, CreateHostRequest};
+    /// use zabbix_api::host::create::CreateHostRequest;
+    /// use zabbix_api::hostgroup::create::CreateHostGroupRequest;
     /// use zabbix_api::ZABBIX_EXTEND_PROPERTY_VALUE;
     ///
     /// let http_client = Client::new();
@@ -332,6 +337,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::get_host_groups`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
     fn get_host_groups<P: Serialize>(
         &self,
         session: &str,
@@ -383,6 +389,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::get_hosts`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
     fn get_hosts<P: Serialize>(
         &self,
         session: &str,
@@ -584,11 +591,14 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::create_host_group`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
     fn create_host_group(
         &self,
         session: &str,
         request: &CreateHostGroupRequest,
     ) -> Result<u32, ZabbixApiError> {
+        use crate::hostgroup::create::CreateHostGroupResponse;
+
         info!("creating host group '{}'..", request.name);
 
         let api_request = get_api_request("hostgroup.create", request, Some(session.to_string()));
@@ -642,6 +652,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::create_host`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
     fn create_host(
         &self,
         session: &str,
@@ -951,8 +962,9 @@ mod tests {
     use serde::Serialize;
 
     use crate::client::client::ZabbixApiClient;
-    use crate::host::get::{GetHostGroupsRequest, GetHostsRequest};
+    use crate::host::get::GetHostsRequest;
     use crate::host::model::ZabbixHost;
+    use crate::hostgroup::get::GetHostGroupsRequest;
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequestById;
     use crate::tests::builder::TestEnvBuilder;

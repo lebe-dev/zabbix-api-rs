@@ -2,12 +2,13 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
-use crate::host::model::ZabbixHostGroupId;
+use crate::hostgroup::create::CreateHostGroupRequest;
+use crate::hostgroup::model::ZabbixHostGroupId;
 use crate::webscenario::model::ZabbixWebScenarioStep;
 use log::error;
 use reqwest::blocking::Client;
 
-use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
+use crate::host::create::CreateHostRequest;
 use crate::item::create::CreateItemRequest;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
