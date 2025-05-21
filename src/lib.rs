@@ -12,6 +12,8 @@ pub mod template;
 
 pub mod r#macro;
 
+pub mod usergroup;
+
 pub mod error;
 
 pub const ZABBIX_EXTEND_PROPERTY_VALUE: &str = "extend";
