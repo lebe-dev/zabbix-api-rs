@@ -201,6 +201,7 @@ pub trait ZabbixApiClient {
         request: &CreateWebScenarioRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    #[cfg(feature = "user")]
     fn create_user_group(
         &self,
         session: &str,
@@ -495,6 +496,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::get_triggers`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "trigger")]
     fn get_triggers<P: Serialize>(
         &self,
         session: &str,
@@ -780,6 +782,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::create_trigger`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "trigger")]
     fn create_trigger(
         &self,
         session: &str,
@@ -906,6 +909,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::create_user_group`.
     ///
     /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/usergroup/create
+    #[cfg(feature = "user")]
     fn create_user_group(
         &self,
         session: &str,

@@ -18,6 +18,7 @@ pub mod template;
 
 pub mod r#macro;
 
+#[cfg(feature = "user")]
 pub mod usergroup;
 
 pub mod error;
