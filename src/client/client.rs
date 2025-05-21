@@ -108,6 +108,7 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixTrigger>, ZabbixApiError>;
 
+    #[cfg(feature = "webscenario")]
     fn get_webscenarios<P: Serialize>(
         &self,
         session: &str,
@@ -195,6 +196,7 @@ pub trait ZabbixApiClient {
         request: &CreateTriggerRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    #[cfg(feature = "webscenario")]
     fn create_webscenario(
         &self,
         session: &str,
@@ -547,6 +549,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::get_webscenarios`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "webscenario")]
     fn get_webscenarios<P: Serialize>(
         &self,
         session: &str,
@@ -846,6 +849,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::create_webscenario`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "webscenario")]
     fn create_webscenario(
         &self,
         session: &str,

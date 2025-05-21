@@ -12,13 +12,15 @@ keywords = ["zabbix", "api"]
 categories = ["api-bindings"]
 
 [features]
-default = ["v7"]
+default = ["v7", "full"]
 v7 = []
 v6 = []
+full = ["host", "item", "trigger", "user", "webscenario"]
 host = []
 item = []
 trigger = []
 user = []
+webscenario = []
 
 [dependencies]
 thiserror = "2.0.12"

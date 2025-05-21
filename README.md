@@ -9,7 +9,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = { version = "0.5.0", features = ["v7", "host"] }
+zabbix-api = { version = "0.5.0", features = ["v7", "full"] }
 ```
 
 Then use:
@@ -36,7 +36,7 @@ fn main() {
 }
 ```
 
-- You can make [raw api calls](src/client/v6/mod.rs#L113).
+- You can make [raw api calls](src/client/client.rs#L36).
 
 ## API Methods
 
@@ -57,7 +57,7 @@ fn main() {
   - [x] Item
   - [x] Trigger
   - [x] Web-scenario
-  - [ ] User Group
+  - [x] User Group
   - [ ] User
 
 ## TODO

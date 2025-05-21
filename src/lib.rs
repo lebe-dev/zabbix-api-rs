@@ -12,6 +12,7 @@ pub mod item;
 #[cfg(feature = "trigger")]
 pub mod trigger;
 
+#[cfg(feature = "webscenario")]
 pub mod webscenario;
 
 pub mod template;
