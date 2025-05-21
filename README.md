@@ -9,14 +9,14 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = "0.4.0"
+zabbix-api = { version = "0.5.0", features = ["v7", "host"] }
 ```
 
 Then use:
 
 ```rust
 use reqwest::blocking::ClientBuilder;
-use zabbix_api::client::v6::ZabbixApiV6Client;
+use zabbix_api::client::client::ZabbixApiClientImpl;
 use zabbix_api::client::ZabbixApiClient;
 
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
        .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
        .build().unwrap();
 
-  let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
+  let client = ZabbixApiClientImpl::new(http_client, "http://localhost:3080/api_jsonrpc.php");
 
   match client.get_auth_session("Admin", "zabbix") {
     Ok(session) => println!("session: {session}"),

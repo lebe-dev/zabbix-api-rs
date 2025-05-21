@@ -80,6 +80,7 @@ pub trait ZabbixApiClient {
     /// let session = client.get_auth_session("Admin", "zabbix").unwrap();
     /// let hosts = client.get_hosts(&session, &request).unwrap();
     /// ```
+    #[cfg(feature = "host")]
     fn get_hosts<P: Serialize>(
         &self,
         session: &str,
@@ -166,6 +167,7 @@ pub trait ZabbixApiClient {
     ///
     /// client.create_host(&session, &request).unwrap();
     /// ```
+    #[cfg(feature = "host")]
     fn create_host(
         &self,
         session: &str,
@@ -1491,7 +1493,7 @@ mod tests {
 
             let request = CreateUserGroupRequest {
                 name: user_group_name.clone(),
-                gui_access: Some(0), // System default
+                gui_access: Some(0),   // System default
                 users_status: Some(0), // Enabled
                 hostgroup_rights: Some(vec![UserGroupPermission {
                     id: host_group_id,

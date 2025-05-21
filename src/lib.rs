@@ -1,5 +1,6 @@
 pub mod client;
 
+#[cfg(feature = "host")]
 pub mod host;
 
 pub mod item;
