@@ -6,6 +6,7 @@ pub mod host;
 #[cfg(feature = "host")]
 pub mod hostgroup;
 
+#[cfg(feature = "item")]
 pub mod item;
 
 pub mod trigger;

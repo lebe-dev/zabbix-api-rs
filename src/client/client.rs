@@ -94,6 +94,7 @@ pub trait ZabbixApiClient {
     /// Find zabbix items.
     ///
     /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/item/get
+    #[cfg(feature = "item")]
     fn get_items<P: Serialize>(
         &self,
         session: &str,
@@ -179,6 +180,7 @@ pub trait ZabbixApiClient {
         request: &CreateHostRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    #[cfg(feature = "item")]
     fn create_item(
         &self,
         session: &str,
@@ -440,6 +442,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::get_items`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "item")]
     fn get_items<P: Serialize>(
         &self,
         session: &str,
@@ -712,6 +715,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     /// Implements `ZabbixApiClient::create_item`.
     ///
     /// See the trait documentation for more details.
+    #[cfg(feature = "item")]
     fn create_item(
         &self,
         session: &str,
