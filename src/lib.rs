@@ -22,6 +22,9 @@ pub mod r#macro;
 #[cfg(feature = "user")]
 pub mod usergroup;
 
+#[cfg(feature = "user")]
+pub mod user;
+
 pub mod error;
 
 pub const ZABBIX_EXTEND_PROPERTY_VALUE: &str = "extend";

@@ -50,7 +50,7 @@ fn main() {
   - [x] Triggers
   - [x] Web-scenarios
   - [ ] User Group
-  - [ ] User
+  - [x] User
 - [x] Create
   - [x] Host Group
   - [x] Host

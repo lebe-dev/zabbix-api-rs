@@ -19,6 +19,8 @@ use crate::item::model::ZabbixItem;
 use crate::trigger::create::CreateTriggerRequest;
 use crate::trigger::create::CreateTriggerResponse;
 use crate::trigger::model::ZabbixTrigger;
+#[cfg(feature = "user")]
+use crate::user::model::ZabbixUser;
 use crate::usergroup::model::{CreateUserGroupRequest, CreateUserGroupResponse};
 use crate::webscenario::create::CreateWebScenarioRequest;
 use crate::webscenario::create::CreateWebScenarioResponse;
@@ -114,6 +116,13 @@ pub trait ZabbixApiClient {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError>;
+
+    #[cfg(feature = "user")]
+    fn get_users<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixUser>, ZabbixApiError>;
 
     #[cfg(feature = "host")]
     fn create_host_group(
@@ -908,6 +917,51 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         }
     }
 
+    #[cfg(feature = "user")]
+    fn get_users<P: Serialize>(
+        &self,
+        session: &str,
+        params: &P,
+    ) -> Result<Vec<ZabbixUser>, ZabbixApiError> {
+        info!("getting users..");
+
+        let api_request = get_api_request("user.get", params, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(&session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixUser>>>(&response_body)?;
+
+                match response.result {
+                    Some(results) => {
+                        info!("users found: {:?}", results.len());
+                        Ok(results)
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
     /// # create_user_group
     ///
     /// Implements `ZabbixApiClient::create_user_group`.
@@ -962,6 +1016,67 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
             Err(e) => {
                 error!("{}", e);
                 Err(e)
+            }
+        }
+    }
+}
+
+#[cfg(all(test, feature = "user"))]
+mod user_tests {
+    use serde::Serialize;
+    use log::{error, info};
+    use std::error::Error as StdError;
+
+    use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
+    use crate::tests::builder::TestEnvBuilder;
+    use crate::tests::integration::are_integration_tests_enabled;
+    use crate::tests::logging::init_logging;
+    use super::ZabbixApiClient;
+
+    #[test]
+    fn get_users_test() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+            test_env.get_session();
+
+            #[derive(Serialize)]
+            struct UserFilterParams {
+                output: String,
+                filter: UserFilter,
+            }
+
+            #[derive(Serialize)]
+            struct UserFilter {
+                alias: Vec<String>,
+            }
+
+            let api_user_alias = test_env.integration_tests_config.zabbix_api_user.clone();
+
+            let params = UserFilterParams {
+                output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
+                filter: UserFilter {
+                    alias: vec![api_user_alias.clone()],
+                },
+            };
+
+            match test_env.client.get_users(&test_env.session, &params) {
+                Ok(users) => {
+                    assert!(!users.is_empty(), "Expected to find at least one user");
+                    let found_user = users.iter().find(|u| u.alias == api_user_alias);
+                    assert!(found_user.is_some(), "Expected to find user with alias '{}'", api_user_alias);
+                    if let Some(user) = found_user {
+                        info!("Successfully fetched user: {:?}", user);
+                    }
+                }
+                Err(e) => {
+                    error!("get_users test failed: {}", e);
+                    if let Some(source) = e.source() {
+                        error!("Caused by: {}", source);
+                    }
+                    panic!("get_users test failed");
+                }
             }
         }
     }
