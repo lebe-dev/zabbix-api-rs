@@ -20,6 +20,8 @@ use crate::trigger::create::CreateTriggerRequest;
 use crate::trigger::create::CreateTriggerResponse;
 use crate::trigger::model::ZabbixTrigger;
 #[cfg(feature = "user")]
+use crate::user::create::{CreateUserRequest, CreateUserResponse};
+#[cfg(feature = "user")]
 use crate::user::model::ZabbixUser;
 #[cfg(feature = "user")]
 use crate::usergroup::model::{CreateUserGroupRequest, CreateUserGroupResponse, ZabbixUserGroup};
@@ -226,6 +228,13 @@ pub trait ZabbixApiClient {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixUserGroup>, ZabbixApiError>;
+
+    #[cfg(feature = "user")]
+    fn create_user(
+        &self,
+        session: &str,
+        request: &CreateUserRequest,
+    ) -> Result<u32, ZabbixApiError>;
 }
 
 #[derive(Debug, Clone)]
@@ -1072,6 +1081,59 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
             }
         }
     }
+
+    #[cfg(feature = "user")]
+    fn create_user(
+        &self,
+        session: &str,
+        request: &CreateUserRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!("creating user '{}'..", request.username);
+
+        let params = [request];
+        let api_request = get_api_request("user.create", &params, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<CreateUserResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+                        info!("user '{}' has been created", request.username);
+
+                        match result.user_ids.first() {
+                            Some(id) => id.parse::<u32>().map_err(|_| ZabbixApiError::Error),
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
 }
 
 #[cfg(all(test, feature = "user"))]
@@ -1085,6 +1147,7 @@ mod user_tests {
     use crate::tests::integration::are_integration_tests_enabled;
     use crate::tests::logging::init_logging;
     use crate::tests::strings::get_random_string;
+    use crate::user::create::{CreateUserRequest, UserGroupId};
     use crate::usergroup::get::{GetUserGroupsRequest, UserGroupFilter};
     use crate::usergroup::model::CreateUserGroupRequest;
     use super::ZabbixApiClient;
@@ -1181,6 +1244,54 @@ mod user_tests {
                         error!("Caused by: {}", source);
                     }
                     panic!("get_user_groups test failed");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn create_user_test() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+            test_env.get_session();
+
+            let user_group_name = format!("test_ug_for_user_create_{}", get_random_string());
+            let create_ug_request = CreateUserGroupRequest {
+                name: user_group_name.clone(),
+                ..Default::default()
+            };
+
+            let user_group_id = test_env.client.create_user_group(&test_env.session, &create_ug_request)
+                .expect("Failed to create user group for create_user_test");
+            info!("Created user group '{}' with ID '{}' for create_user_test", user_group_name, user_group_id);
+
+            let user_alias = format!("test_user_{}", get_random_string());
+            let user_passwd = get_random_string();
+            let role_id = "3"; // Default "User role" ID
+
+            let create_user_req = CreateUserRequest {
+                username: user_alias.clone(),
+                passwd: user_passwd,
+                roleid: role_id.to_string(),
+                usrgrps: vec![UserGroupId { usrgrpid: user_group_id.to_string() }],
+                name: Some("Test".to_string()),
+                surname: Some("User".to_string()),
+                ..Default::default()
+            };
+
+            match test_env.client.create_user(&test_env.session, &create_user_req) {
+                Ok(user_id) => {
+                    assert!(user_id > 0, "Expected a valid user ID to be returned");
+                    info!("Successfully created user '{}' with ID '{}'", user_alias, user_id);
+                }
+                Err(e) => {
+                    error!("create_user test failed: {}", e);
+                    if let Some(source) = e.source() {
+                        error!("Caused by: {}", source);
+                    }
+                    panic!("create_user test failed");
                 }
             }
         }
