@@ -9,14 +9,14 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = "0.3.2"
+zabbix-api = { version = "0.5.0", features = ["v7", "full"] }
 ```
 
 Then use:
 
 ```rust
 use reqwest::blocking::ClientBuilder;
-use zabbix_api::client::v6::ZabbixApiV6Client;
+use zabbix_api::client::client::ZabbixApiClientImpl;
 use zabbix_api::client::ZabbixApiClient;
 
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
        .danger_accept_invalid_certs(false) // Set true if you're using self-signed certificates.
        .build().unwrap();
 
-  let client = ZabbixApiV6Client::new(http_client, "http://localhost:3080/api_jsonrpc.php");
+  let client = ZabbixApiClientImpl::new(http_client, "http://localhost:3080/api_jsonrpc.php");
 
   match client.get_auth_session("Admin", "zabbix") {
     Ok(session) => println!("session: {session}"),
@@ -36,7 +36,7 @@ fn main() {
 }
 ```
 
-- You can make [raw api calls](src/client/v6/mod.rs#L113).
+- You can make [raw api calls](src/client/client.rs#L36).
 
 ## API Methods
 
@@ -50,14 +50,14 @@ fn main() {
   - [x] Triggers
   - [x] Web-scenarios
   - [ ] User Group
-  - [ ] User
+  - [x] User
 - [x] Create
   - [x] Host Group
   - [x] Host
   - [x] Item
   - [x] Trigger
   - [x] Web-scenario
-  - [ ] User Group
+  - [x] User Group
   - [ ] User
 
 ## TODO
@@ -67,5 +67,4 @@ fn main() {
 
 ## Limitations
 
-- API support: [v6](https://www.zabbix.com/documentation/6.0/en/manual/api)
 - Synchronous requests only

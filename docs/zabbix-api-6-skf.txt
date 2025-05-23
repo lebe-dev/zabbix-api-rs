@@ -1,0 +1,87 @@
+# IntegratedKnowledgeManifest_SKF/1.4 LA
+# SourceDocs: [www_zabbix_com_documentation_6_0_en_manual_api-None]
+# GenerationTimestamp: 2025-05-23T19:44:53+00:00
+# PrimaryNamespace: www_zabbix_com_documentation_6_0_en_manual_api
+
+# SECTION: DEFINITIONS (Prefix: D)
+# Format_PrimaryDef: Dxxx:Gxxx_Entity [DEF_TYP] [NAMESPACE "relative.path"] [OPERATIONS {op1:RetT(p1N:p1T); op2_static:RetT()}] [ATTRIBUTES {attr1:AttrT1("Def:Val","RO")}] [CONSTANTS {c1:ValT1("Val")}] ("Note")
+# ---"
+D001:G042 DTDef NAMESPACE "action" OPERATIONS {create(); delete(); get(); update()}
+D002:G043 DTDef NAMESPACE "alert" OPERATIONS {get()}
+D003:G044 DTDef NAMESPACE "auditlog" OPERATIONS {get()}
+D004:G045 DTDef NAMESPACE "authentication" OPERATIONS {get(); update()}
+D005:G046 DTDef NAMESPACE "autoregistration" OPERATIONS {get(); update()}
+D006:G047 DTDef NAMESPACE "correlation" OPERATIONS {create(); delete(); get(); update()}
+D007:G048 DTDef NAMESPACE "dashboard" OPERATIONS {create(); delete(); get(); update()} ATTRIBUTES {Action log; Clock; Data overview; Discovery status; Favorite graphs; Favorite maps; Geomap; Graph; Graph (classic); Graph prototype; Host availability; Item value; Map; Map navigation tree; Plain text; Problem hosts; Problems; Problems by severity; SLA report; System information; Top hosts; Trigger overview; URL; Web monitoring}
+D008:G049 DTDef NAMESPACE "dhost" OPERATIONS {get()}
+D009:G050 DTDef NAMESPACE "dservice" OPERATIONS {get()}
+D010:G051 DTDef NAMESPACE "dcheck" OPERATIONS {get()}
+D011:G052 DTDef NAMESPACE "drule" OPERATIONS {create(); delete(); get(); update()}
+D012:G053 DTDef NAMESPACE "event" OPERATIONS {acknowledge(); get()}
+D013:G054 DTDef NAMESPACE "graph" OPERATIONS {create(); delete(); get(); update()}
+D014:G055 DTDef NAMESPACE "graphitem" OPERATIONS {get()}
+D015:G056 DTDef NAMESPACE "graphprototype" OPERATIONS {create(); delete(); get(); update()}
+D016:G057 DTDef NAMESPACE "hanode" OPERATIONS {get()}
+D017:G058 DTDef NAMESPACE "history" OPERATIONS {clear(); get()}
+D018:G059 DTDef NAMESPACE "host" OPERATIONS {create(); delete(); get(); massadd(); massremove(); massupdate(); update()}
+D019:G060 DTDef NAMESPACE "hostgroup" OPERATIONS {create(); delete(); get(); massadd(); massremove(); massupdate(); update()}
+D020:G061 DTDef NAMESPACE "hostinterface" OPERATIONS {create(); delete(); get(); massadd(); massremove(); replacehostinterfaces(); update()}
+D021:G062 DTDef NAMESPACE "hostprototype" OPERATIONS {create(); delete(); get(); update()}
+D022:G063 DTDef NAMESPACE "housekeeping" OPERATIONS {get(); update()}
+D023:G064 DTDef NAMESPACE "iconmap" OPERATIONS {create(); delete(); get(); update()}
+D024:G065 DTDef NAMESPACE "image" OPERATIONS {create(); delete(); get(); update()}
+D025:G066 DTDef NAMESPACE "item" OPERATIONS {create(); delete(); get(); update()}
+D026:G067 DTDef NAMESPACE "itemprototype" OPERATIONS {create(); delete(); get(); update()}
+D027:G068 DTDef NAMESPACE "maintenance" OPERATIONS {create(); delete(); get(); update()}
+D028:G069 DTDef NAMESPACE "map" OPERATIONS {create(); delete(); get(); update()}
+D029:G070 DTDef NAMESPACE "mediatype" OPERATIONS {create(); delete(); get(); update()}
+D030:G071 DTDef NAMESPACE "problem" OPERATIONS {get()}
+D031:G072 DTDef NAMESPACE "proxy" OPERATIONS {create(); delete(); get(); update()}
+D032:G073 DTDef NAMESPACE "regexp" OPERATIONS {create(); delete(); get(); update()}
+D033:G074 DTDef NAMESPACE "report" OPERATIONS {create(); delete(); get(); update()}
+D034:G075 DTDef NAMESPACE "role" OPERATIONS {create(); delete(); get(); update()}
+D035:G076 DTDef NAMESPACE "script" OPERATIONS {create(); delete(); execute(); get(); getscriptsbyhosts(); update()}
+D036:G077 DTDef NAMESPACE "service" OPERATIONS {create(); delete(); get(); update()}
+D037:G078 DTDef NAMESPACE "settings" OPERATIONS {get(); update()}
+D038:G079 DTDef NAMESPACE "sla" OPERATIONS {create(); delete(); get(); getsli(); update()}
+D039:G080 DTDef NAMESPACE "task" OPERATIONS {create(); get()}
+D040:G081 DTDef NAMESPACE "template" OPERATIONS {create(); delete(); get(); massadd(); massremove(); massupdate(); update()}
+D041:G082 DTDef NAMESPACE "templatedashboard" OPERATIONS {create(); delete(); get(); update()}
+D042:G083 DTDef NAMESPACE "token" OPERATIONS {create(); delete(); generate(); get(); update()}
+D043:G084 DTDef NAMESPACE "trend" OPERATIONS {get()}
+D044:G085 DTDef NAMESPACE "trigger" OPERATIONS {adddependencies(); create(); delete(); deletedependencies(); get(); update()}
+D045:G086 DTDef NAMESPACE "triggerprototype" OPERATIONS {create(); delete(); get(); update()}
+D046:G087 DTDef NAMESPACE "user" OPERATIONS {checkAuthentication(); create(); delete(); get(); login(); logout(); unblock(); update()}
+D047:G088 DTDef NAMESPACE "usergroup" OPERATIONS {create(); delete(); get(); update()}
+D048:G089 DTDef NAMESPACE "usermacro" OPERATIONS {create(); createglobal(); delete(); deleteglobal(); get(); update(); updateglobal()}
+D049:G090 DTDef NAMESPACE "valuemap" OPERATIONS {create(); delete(); get(); update()}
+D050:G091 DTDef NAMESPACE "httptest" OPERATIONS {create(); delete(); get(); update()}
+
+# SECTION: INTERACTIONS (Prefix: I)
+# Format: Ixxx:Source_Ref INT_VERB Target_Ref_Or_Literal ("Note_Conditions_Error(Gxxx_ErrorType)")
+# ---"
+# No interactions identified.
+
+# SECTION: USAGE_PATTERNS (Prefix: U)
+# Format: U_Name:PatternTitleKeyword
+#         U_Name.N:[Actor_Or_Ref] ACTION_KEYWORD (Target_Or_Data_Involving_Ref) -> [Result_Or_State_Change_Involving_Ref]
+# ACTION_KEYWORD Enum: CREATE (instance), CONFIGURE (object/settings), INVOKE (operation/method), GET_ATTR (read attribute/property), SET_ATTR (write attribute/property), PROCESS_DATA, CHECK_STATE, ITERATE (over a collection/stream, e.g., async for), RAISE_ERR, HANDLE_ERR(Gxxx_ErrorType)
+---
+U_APIAuthentication:Authenticate via API
+U_APIAuthentication.1:[User] INVOKE (G087.login, Credentials) -> [G083]
+U_APICreateHost:Create Host via API
+U_APICreateHost.1:[User] INVOKE (G059.create, HostData) -> [G059]
+U_APIGetHosts:Retrieve Hosts via API
+U_APIGetHosts.1:[User] INVOKE (G059.get, FilterCriteria) -> [List<G059>]
+U_APICreateItem:Create Item via API
+U_APICreateItem.1:[User] INVOKE (G066.create, ItemData) -> [G066]
+U_APICreateTrigger:Create Trigger via API
+U_APICreateTrigger.1:[User] INVOKE (G085.create, TriggerData) -> [G085]
+U_APICreateAction:Create Action via API
+U_APICreateAction.1:[User] INVOKE (G042.create, ActionData) -> [G042]
+U_APICreateMediaType:Create Media Type via API
+U_APICreateMediaType.1:[User] INVOKE (G070.create, MediaTypeData) -> [G070]
+U_APICreateDiscoveryRule:Create Discovery Rule via API
+U_APICreateDiscoveryRule.1:[User] INVOKE (G052.create, DiscoveryRuleData) -> [G052]
+
+# END_OF_MANIFEST

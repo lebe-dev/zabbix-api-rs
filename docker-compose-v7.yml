@@ -1,7 +1,6 @@
-version: '3.5'
 services:
   zabbix-server:
-    image: zabbix/zabbix-server-mysql:ubuntu-6.2-latest
+    image: zabbix/zabbix-server-mysql:ubuntu-7.2-latest
     ports:
       - "10051:10051"
     volumes:
@@ -19,10 +18,10 @@ services:
       - net.ipv4.conf.all.send_redirects=0
 
   zabbix-web-nginx-mysql:
-    image: zabbix/zabbix-web-nginx-mysql:ubuntu-6.2-latest
+    image: zabbix/zabbix-web-nginx-mysql:ubuntu-7.2-latest
     ports:
       - "3080:8080"
-      - "443:8443"
+      - "8443:8443"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     env_file:

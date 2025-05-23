@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::error::Error;
 
-use crate::client::client::ZabbixApiClient;
-use crate::client::v6::client::ZabbixApiV6Client;
-use crate::host::model::ZabbixHostGroup;
+use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+use crate::hostgroup::create::CreateHostGroupRequest;
+use crate::hostgroup::model::ZabbixHostGroupId;
 use crate::webscenario::model::ZabbixWebScenarioStep;
 use log::error;
 use reqwest::blocking::Client;
 
-use crate::host::create::{CreateHostGroupRequest, CreateHostRequest};
+use crate::host::create::CreateHostRequest;
 use crate::item::create::CreateItemRequest;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
@@ -17,11 +17,12 @@ use crate::webscenario::create::CreateWebScenarioRequest;
 use super::logging::init_logging;
 
 pub struct TestEnvBuilder {
-    pub client: ZabbixApiV6Client,
+    pub client: ZabbixApiClientImpl,
     pub integration_tests_config: IntegrationTestsConfig,
     pub session: String,
 
     pub latest_host_group_id: u32,
+    pub latest_host_group_name: String,
     pub latest_host_id: u32,
     pub latest_item_id: u32,
     pub latest_trigger_id: u32,
@@ -37,10 +38,11 @@ impl TestEnvBuilder {
         let tests_config = get_integration_tests_config();
 
         TestEnvBuilder {
-            client: ZabbixApiV6Client::new(http_client, &tests_config.zabbix_api_url),
+            client: ZabbixApiClientImpl::new(http_client, &tests_config.zabbix_api_url),
             integration_tests_config: tests_config,
             session: "".to_string(),
             latest_host_group_id: 0,
+            latest_host_group_name: "".to_string(),
             latest_host_id: 0,
             latest_item_id: 0,
             latest_trigger_id: 0,
@@ -71,6 +73,7 @@ impl TestEnvBuilder {
 
         match &self.client.create_host_group(&self.session, &request) {
             Ok(host_group_id) => {
+                self.latest_host_group_name = name.to_string();
                 self.latest_host_group_id = host_group_id.to_owned();
                 self
             }
@@ -88,8 +91,7 @@ impl TestEnvBuilder {
     pub fn create_host(&mut self, name: &str) -> &mut Self {
         let params = CreateHostRequest {
             host: name.to_string(),
-            groups: vec![ZabbixHostGroup {
-                name: "".to_string(),
+            groups: vec![ZabbixHostGroupId {
                 group_id: self.latest_host_group_id.to_string(),
             }],
             interfaces: vec![],
