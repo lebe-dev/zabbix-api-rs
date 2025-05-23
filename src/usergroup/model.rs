@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::user::model::ZabbixUser;
 
 /// Represents the permissions for a host group or template group within a user group.
 /// Corresponds to the "Permission" object in Zabbix API documentation.
@@ -12,6 +13,23 @@ pub struct UserGroupPermission {
     /// 2 - read-only access;
     /// 3 - read-write access.
     pub permission: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ZabbixUserGroup {
+    #[serde(rename = "usrgrpid")]
+    pub usrgrp_id: String,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub gui_access: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub users_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub debug_mode: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub users: Option<Vec<ZabbixUser>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rights: Option<Vec<UserGroupPermission>>,
 }
 
 /// Represents a tag-based permission for a user group.

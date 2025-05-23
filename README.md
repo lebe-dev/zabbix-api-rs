@@ -43,13 +43,13 @@ fn main() {
 - [x] Get API info
 - [x] Authentication
 - [x] RAW API Call
-- [x] Search
+- [x] Get
   - [x] Host Group
   - [x] Hosts
   - [x] Items
   - [x] Triggers
   - [x] Web-scenarios
-  - [ ] User Group
+  - [x] User Group
   - [x] User
 - [x] Create
   - [x] Host Group
@@ -58,6 +58,14 @@ fn main() {
   - [x] Trigger
   - [x] Web-scenario
   - [x] User Group
+  - [ ] User
+- [ ] Delete
+  - [ ] Host Group
+  - [ ] Host
+  - [ ] Item
+  - [ ] Trigger
+  - [ ] Web-scenario
+  - [ ] User Group
   - [ ] User
 
 ## TODO
