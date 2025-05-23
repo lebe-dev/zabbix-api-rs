@@ -1,5 +1,7 @@
 # Development
 
+- [API docs in SKF](docs/README.md)
+
 ## Integration tests
 
 ### V7

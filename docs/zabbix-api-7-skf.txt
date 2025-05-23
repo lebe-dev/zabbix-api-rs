@@ -1,0 +1,101 @@
+# IntegratedKnowledgeManifest_SKF/1.4 LA
+# SourceDocs: [www_zabbix_com_documentation_current_en_manual_api-None]
+# GenerationTimestamp: 2025-05-23T19:22:28+00:00
+# PrimaryNamespace: www_zabbix_com_documentation_current_en_manual_api
+
+# SECTION: DEFINITIONS (Prefix: D)
+# Format_PrimaryDef: Dxxx:Gxxx_Entity [DEF_TYP] [NAMESPACE "relative.path"] [OPERATIONS {op1:RetT(p1N:p1T); op2_static:RetT()}] [ATTRIBUTES {attr1:AttrT1("Def:Val","RO")}] [CONSTANTS {c1:ValT1("Val")}] ("Note")
+# ---"
+D001:G010 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D002:G011 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D003:G012 [DTDef] [NAMESPACE "."] [OPERATIONS {version()}]
+D004:G013 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D005:G014 [DTDef] [NAMESPACE "."] [OPERATIONS {get();update()}]
+D006:G015 [DTDef] [NAMESPACE "."] [OPERATIONS {get();update()}]
+D007:G016 [DTDef] [NAMESPACE "."] [OPERATIONS {export();import();importcompare()}]
+D008:G017 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D009:G018 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D010:G019 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D011:G020 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D012:G021 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D013:G022 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D014:G023 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D015:G024 [DTDef] [NAMESPACE "."] [OPERATIONS {acknowledge();get()}]
+D016:G025 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D017:G026 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D018:G027 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D019:G028 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D020:G029 [DTDef] [NAMESPACE "."] [OPERATIONS {clear();get();push()}]
+D021:G030 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();massadd();massremove();massupdate();update()}]
+D022:G031 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();massadd();massremove();massupdate();propagate();update()}]
+D023:G032 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();massadd();massremove();replacehostinterfaces();update()}]
+D024:G033 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D025:G034 [DTDef] [NAMESPACE "."] [OPERATIONS {get();update()}]
+D026:G035 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D027:G036 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D028:G037 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D029:G038 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D030:G039 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D031:G040 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D032:G041 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D033:G042 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D034:G043 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D035:G044 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D036:G045 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D037:G046 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D038:G047 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D039:G048 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D040:G049 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D041:G050 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();execute();get();getscriptsbyevents();getscriptsbyhosts();update()}]
+D042:G051 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D043:G052 [DTDef] [NAMESPACE "."] [OPERATIONS {get();update()}]
+D044:G053 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();getsli();update()}]
+D045:G054 [DTDef] [NAMESPACE "."] [OPERATIONS {create();get()}]
+D046:G055 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();massadd();massremove();massupdate();update()}]
+D047:G056 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D048:G057 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();massadd();massremove();massupdate();propagate();update()}]
+D049:G058 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();generate();get();update()}]
+D050:G059 [DTDef] [NAMESPACE "."] [OPERATIONS {get()}]
+D051:G060 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D052:G061 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D053:G062 [DTDef] [NAMESPACE "."] [OPERATIONS {checkAuthentication();create();delete();get();login();logout();provision();resettotp();unblock();update()}]
+D054:G063 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();test();update()}]
+D055:G064 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D056:G065 [DTDef] [NAMESPACE "."] [OPERATIONS {create();createglobal();delete();deleteglobal();get();update();updateglobal()}]
+D057:G066 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+D058:G067 [DTDef] [NAMESPACE "."] [OPERATIONS {create();delete();get();update()}]
+
+# SECTION: INTERACTIONS (Prefix: I)
+# Format: Ixxx:Source_Ref INT_VERB Target_Ref_Or_Literal ("Note_Conditions_Error(Gxxx_ErrorType)")
+# ---"
+# No interactions identified.
+
+# SECTION: USAGE_PATTERNS (Prefix: U)
+# Format: U_Name:PatternTitleKeyword
+#         U_Name.N:[Actor_Or_Ref] ACTION_KEYWORD (Target_Or_Data_Involving_Ref) -> [Result_Or_State_Change_Involving_Ref]
+# ACTION_KEYWORD Enum: CREATE (instance), CONFIGURE (object/settings), INVOKE (operation/method), GET_ATTR (read attribute/property), SET_ATTR (write attribute/property), PROCESS_DATA, CHECK_STATE, ITERATE (over a collection/stream, e.g., async for), RAISE_ERR, HANDLE_ERR(Gxxx_ErrorType)
+---
+U_APILogin:AuthenticateUser
+U_APILogin.1:[User] INVOKE (G062.login with credentials) -> [Authentication Token]
+
+U_CreateHostViaAPI:CreateHost
+U_CreateHostViaAPI.1:[User] INVOKE (G062.login with credentials) -> [Authentication Token]
+U_CreateHostViaAPI.2:[User] INVOKE (G030.create with host configuration data and token) -> [New G030 Object ID]
+
+U_CreateItemViaAPI:CreateItem
+U_CreateItemViaAPI.1:[User] INVOKE (G062.login with credentials) -> [Authentication Token]
+U_CreateItemViaAPI.2:[User] INVOKE (G037.create with item configuration data including host ID and token) -> [New G037 Object ID]
+
+U_CreateTriggerViaAPI:CreateTrigger
+U_CreateTriggerViaAPI.1:[User] INVOKE (G062.login with credentials) -> [Authentication Token]
+U_CreateTriggerViaAPI.2:[User] INVOKE (G060.create with trigger configuration data including item ID and token) -> [New G060 Object ID]
+
+U_CreateActionViaAPI:CreateAction
+U_CreateActionViaAPI.1:[User] INVOKE (G062.login with credentials) -> [Authentication Token]
+U_CreateActionViaAPI.2:[User] INVOKE (G010.create with action configuration data and token) -> [New G010 Object ID]
+
+U_ExportConfigurationViaAPI:ExportConfig
+U_ExportConfigurationViaAPI.1:[User] INVOKE (G062.login with credentials) -> [Authentication Token]
+U_ExportConfigurationViaAPI.2:[User] INVOKE (G016.export with export options and token) -> [Configuration Data]
+
+# END_OF_MANIFEST
