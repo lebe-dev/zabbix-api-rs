@@ -58,7 +58,7 @@ fn main() {
   - [x] Trigger
   - [x] Web-scenario
   - [x] User Group
-  - [ ] User
+  - [x] User
 - [ ] Delete
   - [ ] Host Group
   - [ ] Host
