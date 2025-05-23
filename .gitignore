@@ -1,6 +1,6 @@
 .idea
 /target
 /data
-/.DS_Store
+.DS_Store
 /.a*
 /CONVENTIONS.md
