@@ -24,7 +24,10 @@ You can run each example using the `cargo run --example <example_name> --feature
 This example demonstrates basic API connectivity, fetching API version, and obtaining an authentication token.
 
 ```bash
-cargo run --example api_basics
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
+cargo run --example api_basics --features v7,full
 ```
 
 ### 2. Get Hosts
@@ -32,7 +35,10 @@ cargo run --example api_basics
 This example shows how to fetch host information from Zabbix.
 
 ```bash
-cargo run --example get_hosts_example
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
+cargo run --example get_hosts_example --features v7,full
 ```
 
 ### 3. Create Host Group
@@ -40,7 +46,10 @@ cargo run --example get_hosts_example
 This example demonstrates creating a new host group.
 
 ```bash
-cargo run --example create_host_group_example
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
+cargo run --example create_host_group_example --features v7,full
 ```
 
 ### 4. Create Item
@@ -51,8 +60,11 @@ It requires an additional environment variable:
   - Example: `10010`
 
 ```bash
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
 ZABBIX_HOST_ID_FOR_ITEM_EXAMPLE="your_host_id" \
-cargo run --example create_item_example
+cargo run --example create_item_example --features v7,full
 ```
 Replace `"your_host_id"` with an actual host ID from your Zabbix setup.
 
@@ -61,7 +73,10 @@ Replace `"your_host_id"` with an actual host ID from your Zabbix setup.
 This example demonstrates fetching items, for instance, by searching for a specific item key.
 
 ```bash
-cargo run --example get_items_example
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
+cargo run --example get_items_example --features v7,full
 ```
 
-**Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The default feature `v7` and `full` (which includes `item`, `host`, etc.) should be enabled in `Cargo.toml` for these examples to compile and run correctly. Remember to set the common environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`) in your shell session before running these commands.
+**Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).

@@ -54,8 +54,8 @@ fn main() -> Result<(), ZabbixApiError> {
                 println!("Successfully fetched {} item(s) with key '{}':", items.len(), item_key_to_search);
                 for item in items {
                     println!(
-                        "  Item ID: {}, Name: '{}', Key: '{}', Host ID: {}",
-                        item.item_id, item.name, item.key_, item.host_id
+                        "  Name: '{}', Key: '{}', Host ID: {}",
+                        item.name, item.key_, item.host_id
                     );
                 }
             }
