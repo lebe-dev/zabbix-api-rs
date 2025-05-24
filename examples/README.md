@@ -79,4 +79,15 @@ ZABBIX_API_PASSWORD=zabbix \
 cargo run --example get_items_example --features v7,full
 ```
 
+### 6. Raw API Call
+
+This example demonstrates how to use the `raw_api_call` method for direct interaction with the Zabbix API, useful for methods not yet specifically implemented in the client or for custom parameter structures.
+
+```bash
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
+cargo run --example raw_api_call_example --features v7,full
+```
+
 **Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).

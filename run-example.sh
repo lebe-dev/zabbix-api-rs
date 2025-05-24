@@ -9,3 +9,4 @@ cargo run --example create_host_group_example --features v7,full
 cargo run --example create_item_example --features v7,full
 cargo run --example get_hosts_example --features v7,full
 cargo run --example get_items_example --features v7,full
+cargo run --example raw_api_call_example --features v7,full

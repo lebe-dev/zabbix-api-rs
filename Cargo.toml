@@ -56,3 +56,7 @@ path = "examples/create_item_example.rs"
 [[example]]
 name = "get_items_example"
 path = "examples/get_items_example.rs"
+
+[[example]]
+name = "raw_api_call_example"
+path = "examples/raw_api_call_example.rs"
