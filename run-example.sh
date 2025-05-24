@@ -17,6 +17,7 @@ cargo run --example get_user_groups_example --features v7,full
 cargo run --example get_items_example --features v7,full
 cargo run --example get_triggers_example --features v7,full
 cargo run --example get_webscenarios_example --features v7,full
+cargo run --example create_webscenario_example --features v7,full
 cargo run --example raw_api_call_example --features v7,full
 cargo run --example get_users_example --features v7,full
 cargo run --example create_user_example --features v7,full
