@@ -11,6 +11,7 @@ cargo run --example get_host_groups_example --features v7,full
 cargo run --example get_hosts_example --features v7,full
 cargo run --example create_host_example --features v7,full
 cargo run --example create_user_group_example --features v7,full
+cargo run --example get_user_groups_example --features v7,full
 cargo run --example get_items_example --features v7,full
 cargo run --example get_triggers_example --features v7,full
 cargo run --example get_webscenarios_example --features v7,full

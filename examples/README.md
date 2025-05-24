@@ -156,4 +156,15 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example create_user_group_example --features v7,full
 ```
 
+### 13. Get User Groups
+
+This example demonstrates fetching user group information from Zabbix, including users within those groups.
+
+```bash
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
+cargo run --example get_user_groups_example --features v7,full
+```
+
 **Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, `trigger`, `webscenario`, `user`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).
