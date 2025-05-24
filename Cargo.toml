@@ -80,3 +80,7 @@ path = "examples/get_users_example.rs"
 [[example]]
 name = "create_host_example"
 path = "examples/create_host_example.rs"
+
+[[example]]
+name = "create_user_group_example"
+path = "examples/create_user_group_example.rs"
