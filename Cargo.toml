@@ -72,3 +72,7 @@ path = "examples/get_triggers_example.rs"
 [[example]]
 name = "get_webscenarios_example"
 path = "examples/get_webscenarios_example.rs"
+
+[[example]]
+name = "get_users_example"
+path = "examples/get_users_example.rs"
