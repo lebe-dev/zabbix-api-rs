@@ -76,3 +76,7 @@ path = "examples/get_webscenarios_example.rs"
 [[example]]
 name = "get_users_example"
 path = "examples/get_users_example.rs"
+
+[[example]]
+name = "create_host_example"
+path = "examples/create_host_example.rs"

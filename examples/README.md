@@ -52,7 +52,18 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_host_groups_example --features v7,full
 ```
 
-### 4. Create Host Group
+### 4. Create Host Example
+
+This example demonstrates creating a new host, including prerequisite host group creation and assigning an agent interface.
+
+```bash
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
+cargo run --example create_host_example --features v7,full
+```
+
+### 5. Create Host Group
 
 This example demonstrates creating a new host group.
 
@@ -63,7 +74,7 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example create_host_group_example --features v7,full
 ```
 
-### 5. Create Item
+### 6. Create Item
 
 This example shows how to create a new item on a specified host.
 It requires an additional environment variable:
@@ -79,7 +90,7 @@ cargo run --example create_item_example --features v7,full
 ```
 Replace `"10001"` with an actual host ID from your Zabbix setup. The ID "10001" is a placeholder.
 
-### 6. Get Items
+### 7. Get Items
 
 This example demonstrates fetching items, for instance, by searching for a specific item key.
 
@@ -90,7 +101,7 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_items_example --features v7,full
 ```
 
-### 7. Raw API Call
+### 8. Raw API Call
 
 This example demonstrates how to use the `raw_api_call` method for direct interaction with the Zabbix API, useful for methods not yet specifically implemented in the client or for custom parameter structures.
 
@@ -101,7 +112,7 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example raw_api_call_example --features v7,full
 ```
 
-### 8. Get Triggers
+### 9. Get Triggers
 
 This example demonstrates fetching trigger information from Zabbix, including their tags.
 
@@ -112,7 +123,7 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_triggers_example --features v7,full
 ```
 
-### 9. Get Web Scenarios
+### 10. Get Web Scenarios
 
 This example demonstrates fetching web scenario information from Zabbix, including their steps.
 
@@ -123,7 +134,7 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_webscenarios_example --features v7,full
 ```
 
-### 10. Get Users
+### 11. Get Users
 
 This example demonstrates fetching user information from Zabbix.
 
