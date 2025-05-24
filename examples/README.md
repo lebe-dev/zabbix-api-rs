@@ -112,4 +112,15 @@ export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_triggers_example --features v7,full
 ```
 
-**Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, `trigger`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).
+### 9. Get Web Scenarios
+
+This example demonstrates fetching web scenario information from Zabbix, including their steps.
+
+```bash
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
+cargo run --example get_webscenarios_example --features v7,full
+```
+
+**Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, `trigger`, `webscenario`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).

@@ -68,3 +68,7 @@ path = "examples/raw_api_call_example.rs"
 [[example]]
 name = "get_triggers_example"
 path = "examples/get_triggers_example.rs"
+
+[[example]]
+name = "get_webscenarios_example"
+path = "examples/get_webscenarios_example.rs"
