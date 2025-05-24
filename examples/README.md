@@ -24,9 +24,9 @@ You can run each example using the `cargo run --example <example_name> --feature
 This example demonstrates basic API connectivity, fetching API version, and obtaining an authentication token.
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
 cargo run --example api_basics --features v7,full
 ```
 
@@ -35,9 +35,9 @@ cargo run --example api_basics --features v7,full
 This example shows how to fetch host information from Zabbix.
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_hosts_example --features v7,full
 ```
 
@@ -46,9 +46,9 @@ cargo run --example get_hosts_example --features v7,full
 This example demonstrates fetching host groups, optionally filtering by name.
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_host_groups_example --features v7,full
 ```
 
@@ -57,9 +57,9 @@ cargo run --example get_host_groups_example --features v7,full
 This example demonstrates creating a new host group.
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
 cargo run --example create_host_group_example --features v7,full
 ```
 
@@ -71,22 +71,22 @@ It requires an additional environment variable:
   - Example: `10010`
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
-ZABBIX_HOST_ID_FOR_ITEM_EXAMPLE="your_host_id" \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
+export ZABBIX_HOST_ID_FOR_ITEM_EXAMPLE="10001" # Replace "10001" with an actual host ID
 cargo run --example create_item_example --features v7,full
 ```
-Replace `"your_host_id"` with an actual host ID from your Zabbix setup.
+Replace `"10001"` with an actual host ID from your Zabbix setup. The ID "10001" is a placeholder.
 
 ### 6. Get Items
 
 This example demonstrates fetching items, for instance, by searching for a specific item key.
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
 cargo run --example get_items_example --features v7,full
 ```
 
@@ -95,10 +95,21 @@ cargo run --example get_items_example --features v7,full
 This example demonstrates how to use the `raw_api_call` method for direct interaction with the Zabbix API, useful for methods not yet specifically implemented in the client or for custom parameter structures.
 
 ```bash
-ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
-ZABBIX_API_USER=Admin \
-ZABBIX_API_PASSWORD=zabbix \
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
 cargo run --example raw_api_call_example --features v7,full
 ```
 
-**Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).
+### 8. Get Triggers
+
+This example demonstrates fetching trigger information from Zabbix, including their tags.
+
+```bash
+export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
+export ZABBIX_API_USER=Admin
+export ZABBIX_API_PASSWORD=zabbix
+cargo run --example get_triggers_example --features v7,full
+```
+
+**Note:** Ensure your Zabbix server is accessible and the API user has the necessary permissions for the operations performed by each example. The example commands use the features `v7` and `full` (which enables `item`, `host`, `trigger`, etc.). The commands also demonstrate setting the required environment variables (`ZABBIX_API_URL`, `ZABBIX_API_USER`, `ZABBIX_API_PASSWORD`).

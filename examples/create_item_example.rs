@@ -2,6 +2,7 @@ use reqwest::blocking::Client;
 use std::env;
 use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
 use zabbix_api::error::ZabbixApiError;
+use zabbix_api::host::model::ZabbixHostTag; // Added import for explicit typing
 use zabbix_api::item::create::CreateItemRequest; // Ensure this path is correct based on your module structure
 
 // A simple helper to generate a unique key for the example item
@@ -45,7 +46,7 @@ fn main() -> Result<(), ZabbixApiError> {
         value_type: 3, // Type 3: Numeric (unsigned). Adjust for other data types (e.g., 4 for Text).
         interface_id: "0".to_string(), // Use "0" for the first available agent interface, or provide a specific interface ID.
         delay: "1m".to_string(), // Collect data every 1 minute.
-        tags: vec![], // Optional: Add item tags if needed.
+        tags: Vec::<ZabbixHostTag>::new(), // Optional: Add item tags if needed. Made type explicit.
         // Add other optional fields as necessary
     };
 
