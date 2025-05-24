@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 export ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php
 export ZABBIX_API_USER=Admin
 export ZABBIX_API_PASSWORD=zabbix
@@ -17,3 +19,4 @@ cargo run --example get_triggers_example --features v7,full
 cargo run --example get_webscenarios_example --features v7,full
 cargo run --example raw_api_call_example --features v7,full
 cargo run --example get_users_example --features v7,full
+cargo run --example create_user_example --features v7,full
