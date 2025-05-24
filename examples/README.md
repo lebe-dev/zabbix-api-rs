@@ -41,7 +41,18 @@ ZABBIX_API_PASSWORD=zabbix \
 cargo run --example get_hosts_example --features v7,full
 ```
 
-### 3. Create Host Group
+### 3. Get Host Groups
+
+This example demonstrates fetching host groups, optionally filtering by name.
+
+```bash
+ZABBIX_API_URL=http://localhost:3080/api_jsonrpc.php \
+ZABBIX_API_USER=Admin \
+ZABBIX_API_PASSWORD=zabbix \
+cargo run --example get_host_groups_example --features v7,full
+```
+
+### 4. Create Host Group
 
 This example demonstrates creating a new host group.
 
@@ -52,7 +63,7 @@ ZABBIX_API_PASSWORD=zabbix \
 cargo run --example create_host_group_example --features v7,full
 ```
 
-### 4. Create Item
+### 5. Create Item
 
 This example shows how to create a new item on a specified host.
 It requires an additional environment variable:
@@ -68,7 +79,7 @@ cargo run --example create_item_example --features v7,full
 ```
 Replace `"your_host_id"` with an actual host ID from your Zabbix setup.
 
-### 5. Get Items
+### 6. Get Items
 
 This example demonstrates fetching items, for instance, by searching for a specific item key.
 
@@ -79,7 +90,7 @@ ZABBIX_API_PASSWORD=zabbix \
 cargo run --example get_items_example --features v7,full
 ```
 
-### 6. Raw API Call
+### 7. Raw API Call
 
 This example demonstrates how to use the `raw_api_call` method for direct interaction with the Zabbix API, useful for methods not yet specifically implemented in the client or for custom parameter structures.
 
