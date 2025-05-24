@@ -8,7 +8,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = { version = "0.5.0", features = ["v7", "full"] }
+zabbix-api = { version = "0.6.0", features = ["v7", "full"] }
 ```
 
 Check [examples](examples) directory.
@@ -43,10 +43,11 @@ Check [examples](examples) directory.
   - [ ] User Group
   - [ ] User
 
-## TODO
+## RoadMap
 
-- Add examples
-- Use enums for Zabbix types (trigger type, value type, etc.)
+- Add missing fields for models
+- Delete entities (items, triggers, etc.)
+- Async requests support
 
 ## Limitations
 
