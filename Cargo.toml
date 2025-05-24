@@ -48,3 +48,11 @@ path = "examples/get_hosts_example.rs"
 [[example]]
 name = "create_host_group_example"
 path = "examples/create_host_group_example.rs"
+
+[[example]]
+name = "create_item_example"
+path = "examples/create_item_example.rs"
+
+[[example]]
+name = "get_items_example"
+path = "examples/get_items_example.rs"
