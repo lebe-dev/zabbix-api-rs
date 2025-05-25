@@ -41,7 +41,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     ///
@@ -64,7 +64,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     ///
@@ -95,7 +95,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::client::response::ZabbixApiResponse;
@@ -160,7 +160,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::hostgroup::get::GetHostGroupsRequest;
@@ -205,7 +205,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::host::get::GetHostsRequest;
     /// use zabbix_api::host::model::ZabbixHost;
@@ -252,7 +252,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::item::model::ZabbixItem; // For the type of items
@@ -300,7 +300,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::trigger::model::ZabbixTrigger; // For the type of triggers
@@ -350,7 +350,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::webscenario::model::ZabbixWebScenario; // For the type of webscenarios
@@ -397,7 +397,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::user::model::ZabbixUser; // For the type of users
@@ -448,7 +448,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::hostgroup::create::CreateHostGroupRequest;
@@ -486,7 +486,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use std::collections::HashMap;
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
@@ -544,7 +544,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::item::create::CreateItemRequest;
@@ -593,7 +593,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::trigger::create::{CreateTriggerRequest, ZabbixTriggerDependency};
@@ -644,7 +644,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::webscenario::create::CreateWebScenarioRequest;
@@ -696,7 +696,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::usergroup::model::{CreateUserGroupRequest, UserGroupPermission, UserGroupUser};
@@ -747,7 +747,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::usergroup::get::{GetUserGroupsRequest, UserGroupFilter}; // Assuming these structs exist
@@ -794,7 +794,7 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust,no_run
+    /// ```rust
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
     /// use zabbix_api::user::create::{CreateUserRequest, UserGroupId}; // Assuming these structs exist
@@ -1660,8 +1660,9 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
                 debug!("{response_body}");
                 debug!("[/response body]");
 
-                let response =
-                    serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixUserGroup>>>(&response_body)?;
+                let response = serde_json::from_str::<ZabbixApiResponse<Vec<ZabbixUserGroup>>>(
+                    &response_body,
+                )?;
 
                 match response.result {
                     Some(results) => {
@@ -1740,11 +1741,11 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
 #[cfg(all(test, feature = "user"))]
 mod user_tests {
-    use serde::Serialize;
     use log::{error, info};
+    use serde::Serialize;
     use std::error::Error as StdError;
 
-    use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
+    use super::ZabbixApiClient;
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::are_integration_tests_enabled;
     use crate::tests::logging::init_logging;
@@ -1752,7 +1753,7 @@ mod user_tests {
     use crate::user::create::{CreateUserRequest, UserGroupId};
     use crate::usergroup::get::{GetUserGroupsRequest, UserGroupFilter};
     use crate::usergroup::model::CreateUserGroupRequest;
-    use super::ZabbixApiClient;
+    use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
 
     #[test]
     fn get_users_test() {
@@ -1786,7 +1787,11 @@ mod user_tests {
                 Ok(users) => {
                     assert!(!users.is_empty(), "Expected to find at least one user");
                     let found_user = users.iter().find(|u| u.alias == api_user_alias);
-                    assert!(found_user.is_some(), "Expected to find user with alias '{}'", api_user_alias);
+                    assert!(
+                        found_user.is_some(),
+                        "Expected to find user with alias '{}'",
+                        api_user_alias
+                    );
                     if let Some(user) = found_user {
                         info!("Successfully fetched user: {:?}", user);
                     }
@@ -1816,10 +1821,15 @@ mod user_tests {
                 ..Default::default()
             };
 
-            let user_group_id = test_env.client.create_user_group(&test_env.session, &create_request)
+            let user_group_id = test_env
+                .client
+                .create_user_group(&test_env.session, &create_request)
                 .expect("Failed to create user group for get_user_groups_test");
-            info!("Created user group '{}' with ID '{}'", user_group_name, user_group_id);
-            
+            info!(
+                "Created user group '{}' with ID '{}'",
+                user_group_name, user_group_id
+            );
+
             let get_request = GetUserGroupsRequest {
                 output: Some(ZABBIX_EXTEND_PROPERTY_VALUE.to_string()),
                 filter: Some(UserGroupFilter {
@@ -1830,11 +1840,21 @@ mod user_tests {
                 ..Default::default()
             };
 
-            match test_env.client.get_user_groups(&test_env.session, &get_request) {
+            match test_env
+                .client
+                .get_user_groups(&test_env.session, &get_request)
+            {
                 Ok(user_groups) => {
-                    assert!(!user_groups.is_empty(), "Expected to find at least one user group");
+                    assert!(
+                        !user_groups.is_empty(),
+                        "Expected to find at least one user group"
+                    );
                     let found_group = user_groups.iter().find(|ug| ug.name == user_group_name);
-                    assert!(found_group.is_some(), "Expected to find user group with name '{}'", user_group_name);
+                    assert!(
+                        found_group.is_some(),
+                        "Expected to find user group with name '{}'",
+                        user_group_name
+                    );
                     if let Some(group) = found_group {
                         info!("Successfully fetched user group: {:?}", group);
                         assert_eq!(group.usrgrp_id, user_group_id.to_string());
@@ -1865,9 +1885,14 @@ mod user_tests {
                 ..Default::default()
             };
 
-            let user_group_id = test_env.client.create_user_group(&test_env.session, &create_ug_request)
+            let user_group_id = test_env
+                .client
+                .create_user_group(&test_env.session, &create_ug_request)
                 .expect("Failed to create user group for create_user_test");
-            info!("Created user group '{}' with ID '{}' for create_user_test", user_group_name, user_group_id);
+            info!(
+                "Created user group '{}' with ID '{}' for create_user_test",
+                user_group_name, user_group_id
+            );
 
             let user_alias = format!("test_user_{}", get_random_string());
             let user_passwd = get_random_string();
@@ -1877,16 +1902,24 @@ mod user_tests {
                 username: user_alias.clone(),
                 passwd: user_passwd,
                 roleid: role_id.to_string(),
-                usrgrps: vec![UserGroupId { usrgrpid: user_group_id.to_string() }],
+                usrgrps: vec![UserGroupId {
+                    usrgrpid: user_group_id.to_string(),
+                }],
                 name: Some("Test".to_string()),
                 surname: Some("User".to_string()),
                 ..Default::default()
             };
 
-            match test_env.client.create_user(&test_env.session, &create_user_req) {
+            match test_env
+                .client
+                .create_user(&test_env.session, &create_user_req)
+            {
                 Ok(user_id) => {
                     assert!(user_id > 0, "Expected a valid user ID to be returned");
-                    info!("Successfully created user '{}' with ID '{}'", user_alias, user_id);
+                    info!(
+                        "Successfully created user '{}' with ID '{}'",
+                        user_alias, user_id
+                    );
                 }
                 Err(e) => {
                     error!("create_user test failed: {}", e);
