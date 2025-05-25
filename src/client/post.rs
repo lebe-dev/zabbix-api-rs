@@ -17,16 +17,22 @@ pub fn send_post_request<T: Serialize>(
 
     let request_body = serde_json::to_string(&request)?;
 
-    let mut request = client
+    let mut http_request_builder = client
         .post(url)
         .body(request_body)
         .header(CONTENT_TYPE_HEADER, CONTENT_TYPE_JSON);
 
-    if let Some(session) = session {
-        request = request.bearer_auth(session);
+    if let Some(auth_token) = session {
+        #[cfg(feature = "v7")]
+        {
+            // For v7, add token as Bearer auth header
+            http_request_builder = http_request_builder.bearer_auth(auth_token);
+        }
+        // If only v6 feature is enabled (and not v7), token is expected in the JSON body
+        // (handled by ZabbixApiRequest<T> for v6) and not as a Bearer token.
     }
 
-    let response = request.send()?;
+    let response = http_request_builder.send()?;
 
     let response_status = response.status();
     let response_text = response.text()?;

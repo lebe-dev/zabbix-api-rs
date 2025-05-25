@@ -33,11 +33,118 @@ use super::post::send_post_request;
 use super::response::ZabbixApiResponse;
 
 pub trait ZabbixApiClient {
-    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/apiinfo/version
+    /// # get_api_info
+    ///
+    /// Retrieves the version of the Zabbix API.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/apiinfo/version
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    ///
+    /// match client.get_api_info() {
+    ///     Ok(version) => println!("Zabbix API Version: {}", version),
+    ///     Err(e) => eprintln!("Error fetching API info: {:?}", e),
+    /// }
+    /// ```
     fn get_api_info(&self) -> Result<String, ZabbixApiError>;
 
+    /// # get_auth_session
+    ///
+    /// Authenticates a user and returns a session token.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/user/login
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    ///
+    /// match client.get_auth_session(&user, &password) {
+    ///     Ok(session_token) => println!("Successfully authenticated. Session token: {}", session_token),
+    ///     Err(e) => eprintln!("Authentication failed: {:?}", e),
+    /// }
+    /// ```
     fn get_auth_session(&self, login: &str, token: &str) -> Result<String, ZabbixApiError>;
 
+    /// # raw_api_call
+    ///
+    /// Performs a generic Zabbix API call. This method is useful for calling API methods
+    /// that are not yet explicitly supported by this client.
+    ///
+    /// - `session`: The authentication token.
+    /// - `method`: The Zabbix API method to call (e.g., "host.get", "item.create").
+    /// - `params`: The parameters for the API method, serializable to JSON.
+    ///
+    /// Returns a `ZabbixApiResponse` which includes the result or an error.
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::client::response::ZabbixApiResponse;
+    /// use serde::{Serialize, Deserialize}; // Combined and Deserialize is required for DeserializeOwned
+    /// use std::collections::HashMap; // For a simple params map
+    ///
+    /// #[derive(Serialize)]
+    /// struct HostGetParams {
+    ///     output: String,
+    ///     filter: HostFilter,
+    /// }
+    ///
+    /// #[derive(Serialize)]
+    /// struct HostFilter {
+    ///     host: Vec<String>,
+    /// }
+    ///
+    /// #[derive(Deserialize, Debug)] // Add Deserialize and Debug
+    /// struct ZabbixHost {
+    ///    hostid: String,
+    ///    host: String,
+    /// }
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let params = HostGetParams {
+    ///     output: "extend".to_string(),
+    ///     filter: HostFilter {
+    ///         host: vec!["Zabbix server".to_string()],
+    ///     },
+    /// };
+    ///
+    /// match client.raw_api_call::<HostGetParams, Vec<ZabbixHost>>(&session, "host.get", &params) {
+    ///     Ok(response) => {
+    ///         if let Some(hosts) = response.result {
+    ///             println!("Found hosts: {:?}", hosts);
+    ///         } else if let Some(error) = response.error {
+    ///             eprintln!("API Error: {:?}", error);
+    ///         }
+    ///     }
+    ///     Err(e) => eprintln!("Request Error: {:?}", e),
+    /// }
+    /// ```
     fn raw_api_call<P: Serialize, R: DeserializeOwned>(
         &self,
         session: &str,
@@ -45,6 +152,44 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<ZabbixApiResponse<R>, ZabbixApiError>;
 
+    /// # get_host_groups
+    ///
+    /// Retrieves Zabbix host groups based on the provided parameters.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/hostgroup/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::hostgroup::get::GetHostGroupsRequest;
+    /// use zabbix_api::hostgroup::model::ZabbixHostGroup; // For type of host_groups
+    /// use serde::Serialize;
+    /// use std::collections::HashMap; // For an empty filter
+    ///
+    /// #[derive(Serialize)]
+    /// struct EmptyFilter {} // More explicit for an empty filter struct if needed
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// // Example: Get all host groups, extend output
+    /// let params = GetHostGroupsRequest {
+    ///     output: "extend".to_string(),
+    ///     filter: HashMap::<String, String>::new(), // Using HashMap as the filter type R
+    /// };
+    ///
+    /// match client.get_host_groups(&session, &params) {
+    ///     Ok(host_groups) => println!("Found host groups: {:?}", host_groups),
+    ///     Err(e) => eprintln!("Error getting host groups: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "host")]
     fn get_host_groups<P: Serialize>(
         &self,
@@ -56,36 +201,41 @@ pub trait ZabbixApiClient {
     ///
     /// Find zabbix hosts.
     ///
-    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/get
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/host/get
     ///
     /// **Example:**
     ///
-    /// ```rust
+    /// ```rust,no_run
     /// use reqwest::blocking::Client;
     /// use zabbix_api::host::get::GetHostsRequest;
+    /// use zabbix_api::host::model::ZabbixHost;
     /// use serde::Serialize;
-    /// use zabbix_api::client::client::ZabbixApiClientImpl;
-    /// use zabbix_api::client::client::ZabbixApiClient;
+    /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
     ///
     /// #[derive(Serialize)]
-    /// struct Filter {
+    /// struct HostFilterParams {
     ///   pub host: Vec<String>
     /// }
     ///
-    /// let request = GetHostsRequest {
-    ///     filter: Filter {
-    ///     host: vec!["srv-1203".to_string()],
-    ///   },
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let request_params = GetHostsRequest {
+    ///     filter: HostFilterParams {
+    ///         host: vec!["Zabbix server".to_string()],
+    ///     },
+    ///     // output: Some("extend".to_string()), // Add if GetHostsRequest supports it
     /// };
     ///
-    /// let http_client = Client::new();
-    ///
-    /// let zabbix_server = env!("ZABBIX_API_URL");
-    ///
-    /// let client = ZabbixApiClientImpl::new(http_client, &zabbix_server);
-    ///
-    /// let session = client.get_auth_session("Admin", "zabbix").unwrap();
-    /// let hosts = client.get_hosts(&session, &request).unwrap();
+    /// match client.get_hosts(&session, &request_params) {
+    ///     Ok(hosts) => println!("Found hosts: {:?}", hosts),
+    ///     Err(e) => eprintln!("Error getting hosts: {:?}", e),
+    /// }
     /// ```
     #[cfg(feature = "host")]
     fn get_hosts<P: Serialize>(
@@ -98,7 +248,43 @@ pub trait ZabbixApiClient {
     ///
     /// Find zabbix items.
     ///
-    /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/item/get
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/item/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::item::model::ZabbixItem; // For the type of items
+    /// use serde::Serialize;
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// // Replace with a real host ID
+    /// let host_id_to_query = "10084";
+    ///
+    /// #[derive(Serialize)]
+    /// struct ItemParams {
+    ///     output: String,
+    ///     hostids: String,
+    /// }
+    ///
+    /// let params = ItemParams {
+    ///     output: "extend".to_string(),
+    ///     hostids: host_id_to_query.to_string(),
+    /// };
+    ///
+    /// match client.get_items(&session, &params) {
+    ///     Ok(items) => println!("Found items: {:?}", items),
+    ///     Err(e) => eprintln!("Error getting items: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "item")]
     fn get_items<P: Serialize>(
         &self,
@@ -106,6 +292,49 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixItem>, ZabbixApiError>;
 
+    /// # get_triggers
+    ///
+    /// Retrieves Zabbix triggers based on the provided parameters.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/trigger/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::trigger::model::ZabbixTrigger; // For the type of triggers
+    /// use serde::Serialize;
+    /// use std::collections::HashMap;
+    ///
+    /// #[derive(Serialize)]
+    /// struct GetTriggersParams {
+    ///     output: String,
+    ///     select_hosts: String, // Example: "extend"
+    ///     // Add other filters as needed, e.g. hostids, groupids, min_severity
+    ///     // filter: HashMap<String, serde_json::Value>,
+    ///     limit: Option<u32>,
+    /// }
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let params = GetTriggersParams {
+    ///     output: "extend".to_string(),
+    ///     select_hosts: "extend".to_string(),
+    ///     limit: Some(10),
+    /// };
+    ///
+    /// match client.get_triggers(&session, &params) {
+    ///     Ok(triggers) => println!("Found triggers: {:?}", triggers),
+    ///     Err(e) => eprintln!("Error getting triggers: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "trigger")]
     fn get_triggers<P: Serialize>(
         &self,
@@ -113,6 +342,46 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixTrigger>, ZabbixApiError>;
 
+    /// # get_webscenarios
+    ///
+    /// Retrieves Zabbix web scenarios (HTTP tests) based on the provided parameters.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/httptest/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::webscenario::model::ZabbixWebScenario; // For the type of webscenarios
+    /// use serde::Serialize;
+    ///
+    /// #[derive(Serialize)]
+    /// struct GetWebScenariosParams {
+    ///     output: String,
+    ///     select_steps: String, // "extend" to get steps
+    ///     // hostids: Option<Vec<String>>,
+    ///     // limit: Option<u32>,
+    /// }
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let params = GetWebScenariosParams {
+    ///     output: "extend".to_string(),
+    ///     select_steps: "extend".to_string(),
+    /// };
+    ///
+    /// match client.get_webscenarios(&session, &params) {
+    ///     Ok(webscenarios) => println!("Found web scenarios: {:?}", webscenarios),
+    ///     Err(e) => eprintln!("Error getting web scenarios: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "webscenario")]
     fn get_webscenarios<P: Serialize>(
         &self,
@@ -120,6 +389,50 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError>;
 
+    /// # get_users
+    ///
+    /// Retrieves Zabbix users based on the provided parameters.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/user/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::user::model::ZabbixUser; // For the type of users
+    /// use serde::Serialize;
+    ///
+    /// #[derive(Serialize)]
+    /// struct GetUsersParams {
+    ///     output: String,
+    ///     // filter: Option<UserFilter>, // Define UserFilter as needed
+    ///     // select_mediatypes: Option<String>,
+    /// }
+    ///
+    /// // #[derive(Serialize)]
+    /// // struct UserFilter {
+    /// //    alias: Vec<String>,
+    /// // }
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let params = GetUsersParams {
+    ///     output: "extend".to_string(),
+    ///     // filter: Some(UserFilter { alias: vec!["Admin".to_string()] }),
+    /// };
+    ///
+    /// match client.get_users(&session, &params) {
+    ///     Ok(users) => println!("Found users: {:?}", users),
+    ///     Err(e) => eprintln!("Error getting users: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "user")]
     fn get_users<P: Serialize>(
         &self,
@@ -127,6 +440,37 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixUser>, ZabbixApiError>;
 
+    /// # create_host_group
+    ///
+    /// Creates a new Zabbix host group.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/hostgroup/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::hostgroup::create::CreateHostGroupRequest;
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let new_group_name = "My New Host Group";
+    /// let request = CreateHostGroupRequest {
+    ///     name: new_group_name.to_string(),
+    /// };
+    ///
+    /// match client.create_host_group(&session, &request) {
+    ///     Ok(group_id) => println!("Successfully created host group '{}' with ID: {}", new_group_name, group_id),
+    ///     Err(e) => eprintln!("Error creating host group: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "host")]
     fn create_host_group(
         &self,
@@ -142,50 +486,48 @@ pub trait ZabbixApiClient {
     ///
     /// **Example:**
     ///
-    /// ```rust
+    /// ```rust,no_run
     /// use std::collections::HashMap;
-    /// use fake::{Fake, Faker};
     /// use reqwest::blocking::Client;
-    /// use zabbix_api::host::get::GetHostsRequest;
-    /// use zabbix_api::hostgroup::get::GetHostGroupsRequest;
-    /// use serde::Serialize;
-    /// use zabbix_api::client::client::ZabbixApiClientImpl;
-    /// use zabbix_api::client::client::ZabbixApiClient;
+    /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
     /// use zabbix_api::host::create::CreateHostRequest;
-    /// use zabbix_api::hostgroup::create::CreateHostGroupRequest;
-    /// use zabbix_api::ZABBIX_EXTEND_PROPERTY_VALUE;
+    /// use zabbix_api::hostgroup::model::ZabbixHostGroupId; // For specifying group
+    /// // To use the example for interfaces in the line below (currently vec![]),
+    /// // you would uncomment this import:
+    /// // use zabbix_api::host::model::ZabbixHostInterface;
+    /// // Other optional fields in CreateHostRequest might need these:
+    /// // use zabbix_api::host::model::ZabbixHostTag;
+    /// // use zabbix_api::template::model::ZabbixTemplate;
+    /// // use zabbix_api::r#macro::model::ZabbixHostMacro;
     ///
     /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
     ///
-    /// let zabbix_server = env!("ZABBIX_API_URL");
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
     ///
-    /// let client = ZabbixApiClientImpl::new(http_client, &zabbix_server);
+    /// // Assume you have a host_group_id, e.g., from a previous call or configuration
+    /// let known_host_group_id = "2"; // Example host group ID
     ///
-    /// let session = client.get_auth_session("Admin", "zabbix").unwrap();
+    /// let new_host_name = "my-new-example-host".to_string();
     ///
-    /// let filter: HashMap<String,String> = HashMap::new();
-    ///
-    /// let request = GetHostGroupsRequest {
-    ///     output: ZABBIX_EXTEND_PROPERTY_VALUE.to_string(),
-    ///     filter
-    /// };
-    ///
-    /// let host_groups = client.get_host_groups(&session, &request).unwrap();
-    /// let host_group = host_groups.first().unwrap().clone();
-    /// let host_name = Faker.fake::<String>();
-    ///
-    /// let request = CreateHostRequest {
-    ///     host: host_name,
-    ///     groups: vec![host_group.into()],
-    ///     interfaces: vec![],
+    /// let create_host_params = CreateHostRequest {
+    ///     host: new_host_name.clone(),
+    ///     groups: vec![ZabbixHostGroupId { group_id: known_host_group_id.to_string() }],
+    ///     interfaces: vec![], // Add interfaces: e.g., ZabbixHostInterface { r#type: 1, main: 1, use_ip: 1, ip: "127.0.0.1".to_string(), dns: "".to_string() }
     ///     tags: vec![],
     ///     templates: vec![],
     ///     macros: vec![],
-    ///     inventory_mode: 0,
-    ///     inventory: Default::default(),
+    ///     inventory_mode: 0, // 0: disabled, 1: automatic, -1: manual
+    ///     inventory: HashMap::new(),
     /// };
     ///
-    /// client.create_host(&session, &request).unwrap();
+    /// match client.create_host(&session, &create_host_params) {
+    ///     Ok(host_id) => println!("Successfully created host '{}' with ID: {}", new_host_name, host_id),
+    ///     Err(e) => eprintln!("Error creating host: {:?}", e),
+    /// }
     /// ```
     #[cfg(feature = "host")]
     fn create_host(
@@ -194,6 +536,48 @@ pub trait ZabbixApiClient {
         request: &CreateHostRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    /// # create_item
+    ///
+    /// Creates a new Zabbix item.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/item/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::item::create::CreateItemRequest;
+    /// use zabbix_api::host::model::ZabbixHostTag; // For ZabbixItemTag if used
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// // Replace with a real host ID
+    /// let host_id_for_item = "10084";
+    ///
+    /// let request = CreateItemRequest {
+    ///     name: "My New Item".to_string(),
+    ///     key_: "my.new.item.key".to_string(),
+    ///     host_id: host_id_for_item.to_string(),
+    ///     r#type: 0, // Zabbix agent
+    ///     value_type: 3, // Numeric (unsigned)
+    ///     interface_id: "0".to_string(), // Use "0" if not specific interface, or a real one
+    ///     delay: "30s".to_string(),
+    ///     tags: vec![], // Example: vec![ZabbixHostTag { tag: "env".to_string(), value: "prod".to_string() }]
+    ///     // Add other fields as required by your item type
+    /// };
+    ///
+    /// match client.create_item(&session, &request) {
+    ///     Ok(item_id) => println!("Successfully created item '{}' with ID: {}", request.name, item_id),
+    ///     Err(e) => eprintln!("Error creating item: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "item")]
     fn create_item(
         &self,
@@ -201,6 +585,50 @@ pub trait ZabbixApiClient {
         request: &CreateItemRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    /// # create_trigger
+    ///
+    /// Creates a new Zabbix trigger.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/trigger/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::trigger::create::{CreateTriggerRequest, ZabbixTriggerDependency};
+    /// use zabbix_api::trigger::model::ZabbixTriggerTag; // For example fields
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// // This expression assumes a host named 'MyHost' and an item with key 'my.item.key' exists.
+    /// // Replace with a valid expression for your environment.
+    /// let trigger_expression = "last(/MyHost/my.item.key)<10".to_string();
+    ///
+    /// let request = CreateTriggerRequest {
+    ///     description: "My New Trigger".to_string(),
+    ///     expression: trigger_expression,
+    ///     priority: 4, // High priority
+    ///     // Optional fields:
+    ///     recovery_mode: Some(0), // Expression-based recovery
+    ///     recovery_expression: Some("last(/MyHost/my.item.key)>=10".to_string()),
+    ///     url: Some("http://example.com/docs/my-trigger".to_string()),
+    ///     event_name: None,
+    ///     dependencies: vec![], // Example: vec![ZabbixTriggerDependency { trigger_id: "12345".to_string() }]
+    ///     tags: vec![], // Example: vec![ZabbixTriggerTag { tag: "service".to_string(), value: "backend".to_string() }]
+    /// };
+    ///
+    /// match client.create_trigger(&session, &request) {
+    ///     Ok(trigger_id) => println!("Successfully created trigger '{}' with ID: {}", request.description, trigger_id),
+    ///     Err(e) => eprintln!("Error creating trigger: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "trigger")]
     fn create_trigger(
         &self,
@@ -208,6 +636,51 @@ pub trait ZabbixApiClient {
         request: &CreateTriggerRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    /// # create_webscenario
+    ///
+    /// Creates a new Zabbix web scenario (HTTP test).
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/httptest/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::webscenario::create::CreateWebScenarioRequest;
+    /// use zabbix_api::webscenario::model::ZabbixWebScenarioStep; // Assuming this is the step model
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// // Replace with a real host ID that will own this web scenario
+    /// let host_id_for_webscenario = "10084";
+    ///
+    /// let step1 = ZabbixWebScenarioStep {
+    ///     name: "Check Homepage".to_string(),
+    ///     url: "http://example.com".to_string(),
+    ///     status_codes: "200".to_string(),
+    ///     no: "1".to_string(), // Step number
+    ///     // Add other step fields like required string, timeout, etc.
+    /// };
+    ///
+    /// let request = CreateWebScenarioRequest {
+    ///     name: "My Example Web Scenario".to_string(),
+    ///     host_id: host_id_for_webscenario.to_string(),
+    ///     steps: vec![step1],
+    ///     // Add other scenario fields like agent, delay, retries, etc.
+    /// };
+    ///
+    /// match client.create_webscenario(&session, &request) {
+    ///     Ok(webscenario_id) => println!("Successfully created web scenario '{}' with ID: {}", request.name, webscenario_id),
+    ///     Err(e) => eprintln!("Error creating web scenario: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "webscenario")]
     fn create_webscenario(
         &self,
@@ -215,6 +688,50 @@ pub trait ZabbixApiClient {
         request: &CreateWebScenarioRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    /// # create_user_group
+    ///
+    /// Creates a new Zabbix user group.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/usergroup/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::usergroup::model::{CreateUserGroupRequest, UserGroupPermission, UserGroupUser};
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// // Assume host_group_id "2" (Linux servers) and user_id "1" (Admin) exist.
+    /// // Replace with actual IDs from your Zabbix setup.
+    /// let request = CreateUserGroupRequest {
+    ///     name: "My New User Group".to_string(),
+    ///     gui_access: Some(0), // System default
+    ///     users_status: Some(0), // Enabled
+    ///     hostgroup_rights: Some(vec![UserGroupPermission {
+    ///         id: "2".to_string(), // Host group ID to grant permission to
+    ///         permission: 2, // Read-only access
+    ///     }]),
+    ///     users: Some(vec![UserGroupUser {
+    ///         user_id: "1".to_string(), // User ID to add to the group
+    ///     }]),
+    ///     debug_mode: None,
+    ///     templategroup_rights: None, // Added missing field
+    ///     tag_filters: None,
+    /// };
+    ///
+    /// match client.create_user_group(&session, &request) {
+    ///     Ok(user_group_id) => println!("Successfully created user group '{}' with ID: {}", request.name, user_group_id),
+    ///     Err(e) => eprintln!("Error creating user group: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "user")]
     fn create_user_group(
         &self,
@@ -222,6 +739,46 @@ pub trait ZabbixApiClient {
         request: &CreateUserGroupRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    /// # get_user_groups
+    ///
+    /// Retrieves Zabbix user groups based on the provided parameters.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/usergroup/get
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::usergroup::get::{GetUserGroupsRequest, UserGroupFilter}; // Assuming these structs exist
+    /// use serde::Serialize;
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let params = GetUserGroupsRequest {
+    ///     output: Some("extend".to_string()),
+    ///     filter: Some(UserGroupFilter {
+    ///         name: Some(vec!["Zabbix administrators".to_string()]), // Example filter
+    ///     }),
+    ///     // Add other fields like selectUsers, selectRights, etc.
+    ///     usrgrpids: None,
+    ///     userids: None,
+    ///     status: None,
+    ///     select_users: Some("extend".to_string()),
+    ///     select_rights: Some("extend".to_string()),
+    /// };
+    ///
+    /// match client.get_user_groups(&session, &params) {
+    ///     Ok(user_groups) => println!("Found user groups: {:?}", user_groups),
+    ///     Err(e) => eprintln!("Error getting user groups: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "user")]
     fn get_user_groups<P: Serialize>(
         &self,
@@ -229,6 +786,51 @@ pub trait ZabbixApiClient {
         params: &P,
     ) -> Result<Vec<ZabbixUserGroup>, ZabbixApiError>;
 
+    /// # create_user
+    ///
+    /// Creates a new Zabbix user.
+    ///
+    /// API: https://www.zabbix.com/documentation/current/en/manual/api/reference/user/create
+    ///
+    /// **Example:**
+    ///
+    /// ```rust,no_run
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+    /// use zabbix_api::user::create::{CreateUserRequest, UserGroupId}; // Assuming these structs exist
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let api_user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let api_password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&api_user, &api_password).unwrap();
+    ///
+    /// // Assume user_group_id "7" (e.g., "Guests" or some other group) and role_id "1" (e.g., "User role") exist.
+    /// // Replace with actual IDs from your Zabbix setup.
+    /// let request = CreateUserRequest {
+    ///     username: "newapiuser".to_string(),
+    ///     passwd: "SecurePassword123!".to_string(),
+    ///     roleid: "1".to_string(), // Role ID
+    ///     usrgrps: vec![UserGroupId { usrgrpid: "7".to_string() }], // User group(s)
+    ///     name: Some("New".to_string()),
+    ///     surname: Some("API User".to_string()),
+    ///     autologin: Some(0), // 0 = disabled, 1 = enabled
+    ///     autologout: Some("1h".to_string()), // e.g., 1 hour
+    ///     lang: Some("en_US".to_string()),
+    ///     refresh: Some("30s".to_string()),
+    ///     theme: Some("default".to_string()),
+    ///     url: None, // User's homepage URL
+    ///     user_type: None, // Added missing field (e.g., Some(1) for Zabbix admin, Some(2) for Zabbix super admin)
+    ///     user_medias: None, // Media for notifications
+    /// };
+    ///
+    /// match client.create_user(&session, &request) {
+    ///     Ok(user_id) => println!("Successfully created user '{}' with ID: {}", request.username, user_id),
+    ///     Err(e) => eprintln!("Error creating user: {:?}", e),
+    /// }
+    /// ```
     #[cfg(feature = "user")]
     fn create_user(
         &self,
