@@ -522,6 +522,7 @@ pub trait ZabbixApiClient {
     ///     macros: vec![],
     ///     inventory_mode: 0, // 0: disabled, 1: automatic, -1: manual
     ///     inventory: HashMap::new(),
+    ///     ..Default::default()
     /// };
     ///
     /// match client.create_host(&session, &create_host_params) {
@@ -1947,10 +1948,12 @@ mod tests {
     use crate::hostgroup::get::GetHostGroupsRequest;
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequestById;
+    use crate::host::create::TlsConfig;
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::tests::logging::init_logging;
     use crate::tests::strings::get_random_string;
+    use crate::tests::strings::get_random_hex_string;
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerByIdRequest;
     use crate::usergroup::model::{CreateUserGroupRequest, UserGroupPermission, UserGroupUser};
@@ -2108,9 +2111,9 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name1)
-                .create_host(&host_name2)
-                .create_host(&host_name3);
+                .create_host(&host_name1, None)
+                .create_host(&host_name2, None)
+                .create_host(&host_name3, None);
 
             #[derive(Serialize)]
             struct Filter {
@@ -2160,9 +2163,9 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name1)
-                .create_host(&host_name2)
-                .create_host(&host_name3)
+                .create_host(&host_name1, None)
+                .create_host(&host_name2, None)
+                .create_host(&host_name3, None)
                 .create_item(&item_name, &item_key);
 
             #[derive(Serialize)]
@@ -2216,7 +2219,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name)
+                .create_host(&host_name, None)
                 .create_item(&item_name, &item_key)
                 .create_trigger(
                     &trigger_description,
@@ -2265,7 +2268,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name)
+                .create_host(&host_name, None)
                 .create_item(&item_name, &item_key)
                 .create_trigger(
                     &trigger_description,
@@ -2314,10 +2317,53 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name);
+                .create_host(&host_name, None);
 
             assert!(test_env.latest_host_group_id > 0);
             assert!(test_env.latest_host_id > 0);
+        }
+    }
+
+    #[test]
+    fn create_host_with_cert() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name, Some(TlsConfig::new_cert("CN=some issuer".to_string(), "CN=some subject".to_string())));
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+        }
+    }
+
+    #[test]
+    fn create_host_with_psk() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name, Some(TlsConfig::new_psk(get_random_string(), get_random_hex_string())));
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+        }
+    }
+
         }
     }
 
@@ -2334,7 +2380,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name);
+                .create_host(&host_name, None);
 
             let item_key = get_random_string();
             let item_name = get_random_string();
@@ -2382,7 +2428,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name)
+                .create_host(&host_name, None)
                 .create_item(&item_name, &item_key);
 
             let trigger_description = get_random_string();
@@ -2428,7 +2474,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name);
+                .create_host(&host_name, None);
 
             let web_scenario_name = get_random_string();
 
