@@ -5,3 +5,8 @@ use serde::Serialize;
 pub struct GetHostsRequest<R> {
     pub filter: R,
 }
+
+#[derive(Serialize, Debug)]
+pub struct GetHostsByIdsRequest {
+    pub hostids: Vec<String>,
+}
