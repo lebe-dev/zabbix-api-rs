@@ -11,6 +11,8 @@ use crate::error::ZabbixApiError;
 use crate::host::create::CreateHostRequest;
 use crate::host::create::CreateHostResponse;
 use crate::host::model::ZabbixHost;
+use crate::host::update::UpdateHostRequest;
+use crate::host::update::UpdateHostResponse;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroup;
 use crate::item::create::CreateItemRequest;
@@ -537,6 +539,47 @@ pub trait ZabbixApiClient {
         request: &CreateHostRequest,
     ) -> Result<u32, ZabbixApiError>;
 
+    /// # update_host
+    ///
+    /// Update zabbix host.
+    ///
+    /// API: https://www.zabbix.com/documentation/7.0/en/manual/api/reference/host/update
+    ///
+    /// **Example:**
+    ///
+    /// ```rust
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
+    /// use zabbix_api::host::update::UpdateHostRequest;
+    /// use zabbix_api::host::model::HostStatus;
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    ///
+    /// let host_id = "12".to_string();
+    ///
+    /// let update_host_params = UpdateHostRequest {
+    ///     hostid: host_id.clone(),
+    ///     status: HostStatus::Disabled,
+    /// };
+    ///
+    /// match client.update_host(&session, &update_host_params) {
+    ///     Ok(id) => println!("Successfully disabled host with ID: {}", id),
+    ///     Err(e) => eprintln!("Error disabling host: {:?}", e),
+    /// }
+    /// ```
+    #[cfg(feature = "host")]
+    fn update_host(
+        &self,
+        session: &str,
+        request: &UpdateHostRequest,
+    ) -> Result<u32, ZabbixApiError>;
     /// # create_item
     ///
     /// Creates a new Zabbix item.
@@ -1346,6 +1389,66 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         }
     }
 
+    /// # update_host
+    ///
+    /// Implements `ZabbixApiClient::update_host`.
+    ///
+    /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
+    fn update_host(
+        &self,
+        session: &str,
+        request: &UpdateHostRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!("updating host '{:?}'..", &serde_json::to_string(request));
+
+        let api_request = get_api_request("host.update", request, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(&session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<UpdateHostResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+                        info!("host '{}' has been updated", request.hostid);
+
+                        match result.host_ids.first() {
+                            Some(host_id) => {
+                                host_id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
+                            }
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
     /// # create_item
     ///
     /// Implements `ZabbixApiClient::create_item`.
@@ -1949,6 +2052,7 @@ mod tests {
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequestById;
     use crate::host::create::TlsConfig;
+    use crate::host::update::UpdateHostRequest;
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::tests::logging::init_logging;
@@ -2364,6 +2468,26 @@ mod tests {
         }
     }
 
+    #[test]
+    fn create_and_update_host() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name, None);
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+
+            let host_id = test_env.latest_host_id.to_string();
+            test_env.get_session().update_host(UpdateHostRequest::disable_host(host_id));
         }
     }
 

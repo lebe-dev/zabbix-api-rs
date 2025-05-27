@@ -17,6 +17,10 @@ pub fn send_post_request<T: Serialize>(
 
     let request_body = serde_json::to_string(&request)?;
 
+    debug!("---[HTTP REQUEST]----");
+    debug!("{}", request_body);
+    debug!("---[/HTTP REQUEST]----");
+
     let mut http_request_builder = client
         .post(url)
         .body(request_body)

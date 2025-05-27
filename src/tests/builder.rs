@@ -3,10 +3,11 @@ use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
 use crate::host::create::TlsConfig;
+use crate::host::update::UpdateHostRequest;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroupId;
 use crate::webscenario::model::ZabbixWebScenarioStep;
-use log::error;
+use log::{debug, error};
 use reqwest::blocking::Client;
 
 use crate::host::create::CreateHostRequest;
@@ -116,6 +117,51 @@ impl TestEnvBuilder {
                 }
 
                 error!("host create error: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
+    pub fn update_host(&mut self, update_host: UpdateHostRequest) -> &mut Self {
+        use crate::host::get::GetHostsByIdsRequest;
+
+        match &self.client.update_host(&self.session, &update_host) {
+            Ok(_) => {
+                match &self.client.get_hosts(&self.session, &GetHostsByIdsRequest {
+                    hostids: vec![update_host.hostid.clone()],
+                }) {
+                    Ok(hosts) => {
+                        if hosts.is_empty() {
+                            error!("host update error: {}", "host not found");
+                            panic!("host not found");
+                        }
+
+                        let host = hosts.first().unwrap();
+
+                        debug!("host: {:?}, update_host: {:?}", host.status, update_host.status);
+                        if host.status != update_host.status {
+                            error!("host update error: {}", "host status not updated");
+                            panic!("host status not updated");
+                        }
+                    }
+                    Err(e) => {
+                        if let Some(inner_source) = e.source() {
+                            println!("Caused by: {}", inner_source);
+                        }
+
+                        error!("host get error: {}", e);
+                        panic!("{}", e)
+                    }
+                }
+
+                self
+            }
+            Err(e) => {
+                if let Some(inner_source) = e.source() {
+                    println!("Caused by: {}", inner_source);
+                }
+
+                error!("host update error: {}", e);
                 panic!("{}", e)
             }
         }
