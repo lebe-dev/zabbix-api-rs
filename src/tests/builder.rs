@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+use crate::host::create::TlsConfig;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroupId;
 use crate::webscenario::model::ZabbixWebScenarioStep;
@@ -88,7 +89,7 @@ impl TestEnvBuilder {
         }
     }
 
-    pub fn create_host(&mut self, name: &str) -> &mut Self {
+    pub fn create_host(&mut self, name: &str, tls_config: Option<TlsConfig>) -> &mut Self {
         let params = CreateHostRequest {
             host: name.to_string(),
             groups: vec![ZabbixHostGroupId {
@@ -100,6 +101,8 @@ impl TestEnvBuilder {
             macros: vec![],
             inventory_mode: 0,
             inventory: HashMap::new(),
+            tls_config: tls_config,
+            ..Default::default()
         };
 
         match &self.client.create_host(&self.session, &params) {

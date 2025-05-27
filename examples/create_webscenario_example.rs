@@ -55,12 +55,8 @@ fn main() -> Result<(), ZabbixApiError> {
         groups: vec![ZabbixHostGroupId {
             group_id: group_id.clone(),
         }],
-        interfaces: vec![], // No interfaces needed for a simple web scenario example
-        tags: vec![],
-        templates: vec![],
-        macros: vec![],
-        inventory_mode: 0,
-        inventory: std::collections::HashMap::new(),
+        // No interfaces needed for a simple web scenario example
+        ..Default::default()
     };
 
     let host_id = match client.create_host(&session, &create_host_request) {

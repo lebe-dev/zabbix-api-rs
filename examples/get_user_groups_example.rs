@@ -1,5 +1,4 @@
 use reqwest::blocking::Client;
-use serde::Serialize;
 // std::env is not used as credentials are hardcoded
 use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
 use zabbix_api::error::ZabbixApiError;

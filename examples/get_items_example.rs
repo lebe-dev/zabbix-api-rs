@@ -1,9 +1,8 @@
 use reqwest::blocking::Client;
-use serde::Serialize;
 use std::env;
 use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
 use zabbix_api::error::ZabbixApiError;
-use zabbix_api::item::get::{GetItemsRequestByKey, SearchByKey}; // Ensure this path is correct
+use zabbix_api::item::get::{GetItemsRequestByKey};
 
 fn main() -> Result<(), ZabbixApiError> {
     let zabbix_api_url =
