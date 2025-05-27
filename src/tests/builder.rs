@@ -167,6 +167,19 @@ impl TestEnvBuilder {
         }
     }
 
+    pub fn delete_hosts(&mut self, host_ids: &Vec<String>) -> &mut Self {
+        match self.client.delete_hosts(&self.session, host_ids) {
+            Ok(ids) => {
+                println!("Successfully deleted hosts with IDs: {:?}", ids);
+                self
+            }
+            Err(e) => {
+                error!("Error deleting hosts: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
     pub fn create_item(&mut self, name: &str, key_: &str) -> &mut Self {
         let params = CreateItemRequest {
             name: name.to_string(),
