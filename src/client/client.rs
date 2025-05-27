@@ -561,7 +561,6 @@ pub trait ZabbixApiClient {
     /// let client = ZabbixApiClientImpl::new(http_client, &url);
     /// let session = client.get_auth_session(&user, &password).unwrap();
     ///
-    ///
     /// let host_id = "12".to_string();
     ///
     /// let update_host_params = UpdateHostRequest {
@@ -580,6 +579,43 @@ pub trait ZabbixApiClient {
         session: &str,
         request: &UpdateHostRequest,
     ) -> Result<u32, ZabbixApiError>;
+
+    /// # delete_host
+    ///
+    /// Delete zabbix host.
+    ///
+    /// API: https://www.zabbix.com/documentation/7.0/en/manual/api/reference/host/delete
+    ///
+    /// **Example:**
+    ///
+    /// ```rust
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let host_id = "12";
+    ///
+    /// let delete_host_params = vec![host_id.to_string()];
+    ///
+    /// match client.delete_hosts(&session, &delete_host_params) {
+    ///     Ok(ids) => println!("Successfully deleted hosts with IDs: {:?}", ids),
+    ///     Err(e) => eprintln!("Error deleting hosts: {:?}", e),
+    /// }
+    /// ```
+    #[cfg(feature = "host")]
+    fn delete_hosts(
+        &self,
+        session: &str,
+        host_ids: &Vec<String>,
+    ) -> Result<Vec<String>, ZabbixApiError>;
+
     /// # create_item
     ///
     /// Creates a new Zabbix item.
@@ -1449,6 +1485,58 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         }
     }
 
+    /// # delete_host
+    ///
+    /// Implements `ZabbixApiClient::delete_host`.
+    ///
+    /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
+    fn delete_hosts(
+        &self,
+        session: &str,
+        host_ids: &Vec<String>,
+    ) -> Result<Vec<String>, ZabbixApiError> {
+        info!("deleting hosts '{:?}'..", &serde_json::to_string(host_ids));
+
+        let api_request = get_api_request("host.delete", host_ids, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(&session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<UpdateHostResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+                        debug!("hosts '{:?}' have been deleted", result.host_ids);
+
+                        Ok(result.host_ids)
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
     /// # create_item
     ///
     /// Implements `ZabbixApiClient::create_item`.
@@ -2237,6 +2325,68 @@ mod tests {
                     let host = hosts.first().unwrap();
 
                     assert_eq!(&host.host, &host_name2)
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("host get error: {}", e);
+                    panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn delete_hosts_test() {
+        init_logging();
+
+        #[derive(Serialize)]
+        struct HostFilter {
+            pub host: Vec<String>,
+        }
+
+        if are_integration_tests_enabled() {
+            use crate::host::get::GetHostsByIdsRequest;
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name1 = get_random_string();
+            let host_name2 = get_random_string();
+            let host_name3 = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name1, None)
+                .create_host(&host_name2, None)
+                .create_host(&host_name3, None);
+
+            match test_env.client.get_hosts(&test_env.session, &GetHostsRequest { filter: HostFilter { host: vec![host_name1, host_name2, host_name3] } }) {
+                Ok(hosts) => {
+                    let host_ids = hosts.iter().map(|host| host.host_id.clone()).collect::<Vec<String>>();
+
+                    test_env.get_session().delete_hosts(&host_ids);
+
+                    match test_env.client.get_hosts(
+                        &test_env.session,
+                        &GetHostsByIdsRequest {
+                            hostids: host_ids,
+                        },
+                    ) {
+                        Ok(hosts) => {
+                            assert!(hosts.is_empty());
+                        }
+                        Err(e) => {
+                            if let Some(inner_source) = e.source() {
+                                println!("Caused by: {}", inner_source);
+                            }
+
+                            error!("host get error: {}", e);
+                            panic!("{}", e)
+                        }
+                    }
                 }
                 Err(e) => {
                     if let Some(inner_source) = e.source() {
