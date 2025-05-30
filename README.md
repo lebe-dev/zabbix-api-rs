@@ -36,7 +36,7 @@ Check [examples](examples) directory.
   - [x] User
 - [ ] Delete
   - [ ] Host Group
-  - [ ] Host
+  - [x] Host
   - [ ] Item
   - [ ] Trigger
   - [ ] Web-scenario
