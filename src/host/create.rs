@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     hostgroup::model::ZabbixHostGroupId, r#macro::model::ZabbixHostMacro,
-    template::model::ZabbixTemplate,
+    template::model::ZabbixTemplateId,
 };
 
 use super::model::{ZabbixHostInterface, ZabbixHostTag};
@@ -57,7 +57,7 @@ pub struct CreateHostRequest {
     pub groups: Vec<ZabbixHostGroupId>,
     pub interfaces: Vec<ZabbixHostInterface>,
     pub tags: Vec<ZabbixHostTag>,
-    pub templates: Vec<ZabbixTemplate>,
+    pub templates: Vec<ZabbixTemplateId>,
     pub macros: Vec<ZabbixHostMacro>,
     pub inventory_mode: u8,
     pub inventory: HashMap<String, String>,
