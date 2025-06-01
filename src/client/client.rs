@@ -11,6 +11,8 @@ use crate::error::ZabbixApiError;
 use crate::host::create::CreateHostRequest;
 use crate::host::create::CreateHostResponse;
 use crate::host::model::ZabbixHost;
+use crate::host::update::UpdateHostRequest;
+use crate::host::update::UpdateHostResponse;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroup;
 use crate::item::create::CreateItemRequest;
@@ -522,6 +524,7 @@ pub trait ZabbixApiClient {
     ///     macros: vec![],
     ///     inventory_mode: 0, // 0: disabled, 1: automatic, -1: manual
     ///     inventory: HashMap::new(),
+    ///     ..Default::default()
     /// };
     ///
     /// match client.create_host(&session, &create_host_params) {
@@ -535,6 +538,83 @@ pub trait ZabbixApiClient {
         session: &str,
         request: &CreateHostRequest,
     ) -> Result<u32, ZabbixApiError>;
+
+    /// # update_host
+    ///
+    /// Update zabbix host.
+    ///
+    /// API: https://www.zabbix.com/documentation/7.0/en/manual/api/reference/host/update
+    ///
+    /// **Example:**
+    ///
+    /// ```rust
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
+    /// use zabbix_api::host::update::UpdateHostRequest;
+    /// use zabbix_api::host::model::HostStatus;
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let host_id = "12".to_string();
+    ///
+    /// let update_host_params = UpdateHostRequest {
+    ///     hostid: host_id.clone(),
+    ///     status: HostStatus::Disabled,
+    /// };
+    ///
+    /// match client.update_host(&session, &update_host_params) {
+    ///     Ok(id) => println!("Successfully disabled host with ID: {}", id),
+    ///     Err(e) => eprintln!("Error disabling host: {:?}", e),
+    /// }
+    /// ```
+    #[cfg(feature = "host")]
+    fn update_host(
+        &self,
+        session: &str,
+        request: &UpdateHostRequest,
+    ) -> Result<u32, ZabbixApiError>;
+
+    /// # delete_host
+    ///
+    /// Delete zabbix host.
+    ///
+    /// API: https://www.zabbix.com/documentation/7.0/en/manual/api/reference/host/delete
+    ///
+    /// **Example:**
+    ///
+    /// ```rust
+    /// use reqwest::blocking::Client;
+    /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
+    ///
+    /// let http_client = Client::new();
+    /// let url = std::env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL not set");
+    /// let user = std::env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER not set");
+    /// let password = std::env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD not set");
+    ///
+    /// let client = ZabbixApiClientImpl::new(http_client, &url);
+    /// let session = client.get_auth_session(&user, &password).unwrap();
+    ///
+    /// let host_id = "12";
+    ///
+    /// let delete_host_params = vec![host_id.to_string()];
+    ///
+    /// match client.delete_hosts(&session, &delete_host_params) {
+    ///     Ok(ids) => println!("Successfully deleted hosts with IDs: {:?}", ids),
+    ///     Err(e) => eprintln!("Error deleting hosts: {:?}", e),
+    /// }
+    /// ```
+    #[cfg(feature = "host")]
+    fn delete_hosts(
+        &self,
+        session: &str,
+        host_ids: &Vec<String>,
+    ) -> Result<Vec<String>, ZabbixApiError>;
 
     /// # create_item
     ///
@@ -1345,6 +1425,118 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         }
     }
 
+    /// # update_host
+    ///
+    /// Implements `ZabbixApiClient::update_host`.
+    ///
+    /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
+    fn update_host(
+        &self,
+        session: &str,
+        request: &UpdateHostRequest,
+    ) -> Result<u32, ZabbixApiError> {
+        info!("updating host '{:?}'..", &serde_json::to_string(request));
+
+        let api_request = get_api_request("host.update", request, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(&session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<UpdateHostResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+                        info!("host '{}' has been updated", request.hostid);
+
+                        match result.host_ids.first() {
+                            Some(host_id) => {
+                                host_id.parse::<u32>().map_err(|_| ZabbixApiError::Error)
+                            }
+                            None => {
+                                error!("unexpected error, server returned empty id list");
+                                Err(ZabbixApiError::Error)
+                            }
+                        }
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
+    /// # delete_host
+    ///
+    /// Implements `ZabbixApiClient::delete_host`.
+    ///
+    /// See the trait documentation for more details.
+    #[cfg(feature = "host")]
+    fn delete_hosts(
+        &self,
+        session: &str,
+        host_ids: &Vec<String>,
+    ) -> Result<Vec<String>, ZabbixApiError> {
+        info!("deleting hosts '{:?}'..", &serde_json::to_string(host_ids));
+
+        let api_request = get_api_request("host.delete", host_ids, Some(session.to_string()));
+
+        match send_post_request(
+            &self.client,
+            &self.api_endpoint_url,
+            Some(&session),
+            api_request,
+        ) {
+            Ok(response_body) => {
+                debug!("[response body]");
+                debug!("{response_body}");
+                debug!("[/response body]");
+
+                let response =
+                    serde_json::from_str::<ZabbixApiResponse<UpdateHostResponse>>(&response_body)?;
+
+                match response.result {
+                    Some(result) => {
+                        debug!("hosts '{:?}' have been deleted", result.host_ids);
+
+                        Ok(result.host_ids)
+                    }
+                    None => match response.error {
+                        Some(error) => {
+                            error!("{:?}", error);
+
+                            Err(ZabbixApiError::ApiCallError { zabbix: error })
+                        }
+                        None => Err(ZabbixApiError::BadRequestError),
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                Err(e)
+            }
+        }
+    }
+
     /// # create_item
     ///
     /// Implements `ZabbixApiClient::create_item`.
@@ -1947,10 +2139,13 @@ mod tests {
     use crate::hostgroup::get::GetHostGroupsRequest;
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequestById;
+    use crate::host::create::TlsConfig;
+    use crate::host::update::UpdateHostRequest;
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::tests::logging::init_logging;
     use crate::tests::strings::get_random_string;
+    use crate::tests::strings::get_random_hex_string;
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerByIdRequest;
     use crate::usergroup::model::{CreateUserGroupRequest, UserGroupPermission, UserGroupUser};
@@ -2108,9 +2303,9 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name1)
-                .create_host(&host_name2)
-                .create_host(&host_name3);
+                .create_host(&host_name1, None)
+                .create_host(&host_name2, None)
+                .create_host(&host_name3, None);
 
             #[derive(Serialize)]
             struct Filter {
@@ -2144,6 +2339,68 @@ mod tests {
     }
 
     #[test]
+    fn delete_hosts_test() {
+        init_logging();
+
+        #[derive(Serialize)]
+        struct HostFilter {
+            pub host: Vec<String>,
+        }
+
+        if are_integration_tests_enabled() {
+            use crate::host::get::GetHostsByIdsRequest;
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name1 = get_random_string();
+            let host_name2 = get_random_string();
+            let host_name3 = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name1, None)
+                .create_host(&host_name2, None)
+                .create_host(&host_name3, None);
+
+            match test_env.client.get_hosts(&test_env.session, &GetHostsRequest { filter: HostFilter { host: vec![host_name1, host_name2, host_name3] } }) {
+                Ok(hosts) => {
+                    let host_ids = hosts.iter().map(|host| host.host_id.clone()).collect::<Vec<String>>();
+
+                    test_env.get_session().delete_hosts(&host_ids);
+
+                    match test_env.client.get_hosts(
+                        &test_env.session,
+                        &GetHostsByIdsRequest {
+                            hostids: host_ids,
+                        },
+                    ) {
+                        Ok(hosts) => {
+                            assert!(hosts.is_empty());
+                        }
+                        Err(e) => {
+                            if let Some(inner_source) = e.source() {
+                                println!("Caused by: {}", inner_source);
+                            }
+
+                            error!("host get error: {}", e);
+                            panic!("{}", e)
+                        }
+                    }
+                }
+                Err(e) => {
+                    if let Some(inner_source) = e.source() {
+                        println!("Caused by: {}", inner_source);
+                    }
+
+                    error!("host get error: {}", e);
+                    panic!("{}", e)
+                }
+            }
+        }
+    }
+
+    #[test]
     fn get_items_test() {
         init_logging();
 
@@ -2160,9 +2417,9 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name1)
-                .create_host(&host_name2)
-                .create_host(&host_name3)
+                .create_host(&host_name1, None)
+                .create_host(&host_name2, None)
+                .create_host(&host_name3, None)
                 .create_item(&item_name, &item_key);
 
             #[derive(Serialize)]
@@ -2216,7 +2473,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name)
+                .create_host(&host_name, None)
                 .create_item(&item_name, &item_key)
                 .create_trigger(
                     &trigger_description,
@@ -2265,7 +2522,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name)
+                .create_host(&host_name, None)
                 .create_item(&item_name, &item_key)
                 .create_trigger(
                     &trigger_description,
@@ -2314,10 +2571,73 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name);
+                .create_host(&host_name, None);
 
             assert!(test_env.latest_host_group_id > 0);
             assert!(test_env.latest_host_id > 0);
+        }
+    }
+
+    #[test]
+    fn create_host_with_cert() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name, Some(TlsConfig::new_cert("CN=some issuer".to_string(), "CN=some subject".to_string())));
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+        }
+    }
+
+    #[test]
+    fn create_host_with_psk() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name, Some(TlsConfig::new_psk(get_random_string(), get_random_hex_string())));
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+        }
+    }
+
+    #[test]
+    fn create_and_update_host() {
+        init_logging();
+
+        if are_integration_tests_enabled() {
+            let mut test_env = TestEnvBuilder::build();
+
+            let group_name = get_random_string();
+            let host_name = get_random_string();
+
+            test_env
+                .get_session()
+                .create_host_group(&group_name)
+                .create_host(&host_name, None);
+
+            assert!(test_env.latest_host_group_id > 0);
+            assert!(test_env.latest_host_id > 0);
+
+            let host_id = test_env.latest_host_id.to_string();
+            test_env.get_session().update_host(UpdateHostRequest::disable_host(host_id));
         }
     }
 
@@ -2334,7 +2654,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name);
+                .create_host(&host_name, None);
 
             let item_key = get_random_string();
             let item_name = get_random_string();
@@ -2382,7 +2702,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name)
+                .create_host(&host_name, None)
                 .create_item(&item_name, &item_key);
 
             let trigger_description = get_random_string();
@@ -2428,7 +2748,7 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name);
+                .create_host(&host_name, None);
 
             let web_scenario_name = get_random_string();
 

@@ -70,6 +70,7 @@ fn main() -> Result<(), ZabbixApiError> {
         macros: vec![],    // Optional: Add host macros if needed
         inventory_mode: 0, // Optional: Inventory mode (0 for disabled)
         inventory: HashMap::new(), // Optional: Host inventory
+        ..Default::default() // Instead of all the vec![] above, you can just replace by default()
     };
 
     println!(

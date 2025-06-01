@@ -2,10 +2,12 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
+use crate::host::create::TlsConfig;
+use crate::host::update::UpdateHostRequest;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroupId;
 use crate::webscenario::model::ZabbixWebScenarioStep;
-use log::error;
+use log::{debug, error};
 use reqwest::blocking::Client;
 
 use crate::host::create::CreateHostRequest;
@@ -88,7 +90,7 @@ impl TestEnvBuilder {
         }
     }
 
-    pub fn create_host(&mut self, name: &str) -> &mut Self {
+    pub fn create_host(&mut self, name: &str, tls_config: Option<TlsConfig>) -> &mut Self {
         let params = CreateHostRequest {
             host: name.to_string(),
             groups: vec![ZabbixHostGroupId {
@@ -100,6 +102,8 @@ impl TestEnvBuilder {
             macros: vec![],
             inventory_mode: 0,
             inventory: HashMap::new(),
+            tls_config: tls_config,
+            ..Default::default()
         };
 
         match &self.client.create_host(&self.session, &params) {
@@ -113,6 +117,64 @@ impl TestEnvBuilder {
                 }
 
                 error!("host create error: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
+    pub fn update_host(&mut self, update_host: UpdateHostRequest) -> &mut Self {
+        use crate::host::get::GetHostsByIdsRequest;
+
+        match &self.client.update_host(&self.session, &update_host) {
+            Ok(_) => {
+                match &self.client.get_hosts(&self.session, &GetHostsByIdsRequest {
+                    hostids: vec![update_host.hostid.clone()],
+                }) {
+                    Ok(hosts) => {
+                        if hosts.is_empty() {
+                            error!("host update error: {}", "host not found");
+                            panic!("host not found");
+                        }
+
+                        let host = hosts.first().unwrap();
+
+                        debug!("host: {:?}, update_host: {:?}", host.status, update_host.status);
+                        if host.status != update_host.status {
+                            error!("host update error: {}", "host status not updated");
+                            panic!("host status not updated");
+                        }
+                    }
+                    Err(e) => {
+                        if let Some(inner_source) = e.source() {
+                            println!("Caused by: {}", inner_source);
+                        }
+
+                        error!("host get error: {}", e);
+                        panic!("{}", e)
+                    }
+                }
+
+                self
+            }
+            Err(e) => {
+                if let Some(inner_source) = e.source() {
+                    println!("Caused by: {}", inner_source);
+                }
+
+                error!("host update error: {}", e);
+                panic!("{}", e)
+            }
+        }
+    }
+
+    pub fn delete_hosts(&mut self, host_ids: &Vec<String>) -> &mut Self {
+        match self.client.delete_hosts(&self.session, host_ids) {
+            Ok(ids) => {
+                println!("Successfully deleted hosts with IDs: {:?}", ids);
+                self
+            }
+            Err(e) => {
+                error!("Error deleting hosts: {}", e);
                 panic!("{}", e)
             }
         }
