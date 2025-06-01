@@ -8,7 +8,7 @@ Add dependencies in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zabbix-api = { version = "0.6.0", features = ["v7", "full"] }
+zabbix-api = { version = "0.7.0", features = ["v7", "full"] }
 ```
 
 Check [examples](examples) directory.
