@@ -11,6 +11,7 @@ use log::{debug, error};
 use reqwest::blocking::Client;
 
 use crate::host::create::CreateHostRequest;
+use crate::host::model::ZabbixHostInterface;
 use crate::item::create::CreateItemRequest;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
@@ -96,7 +97,7 @@ impl TestEnvBuilder {
             groups: vec![ZabbixHostGroupId {
                 group_id: self.latest_host_group_id.to_string(),
             }],
-            interfaces: vec![],
+            interfaces: vec![ZabbixHostInterface { r#type: 1, main: 1, use_ip: 1, ip: "127.0.0.1".to_string(), dns: "".to_string(), port: "10050".to_string() }],
             tags: vec![],
             templates: vec![],
             macros: vec![],
