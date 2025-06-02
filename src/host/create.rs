@@ -54,6 +54,8 @@ impl TlsConfig {
 #[derive(Serialize, Debug)]
 pub struct CreateHostRequest {
     pub host: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     pub groups: Vec<ZabbixHostGroupId>,
     pub interfaces: Vec<ZabbixHostInterface>,
     pub tags: Vec<ZabbixHostTag>,
@@ -70,6 +72,7 @@ impl Default for CreateHostRequest {
     fn default() -> CreateHostRequest {
         CreateHostRequest {
             host: "".to_string(),
+            name: None,
             groups: Vec::new(),
             interfaces: Vec::new(),
             tags: Vec::new(),
