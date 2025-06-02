@@ -72,6 +72,8 @@ pub struct ZabbixHostInterface {
 
     pub dns: String,
 
+    pub port: String,
+
     #[serde(rename = "useip")]
     pub use_ip: u8,
 }

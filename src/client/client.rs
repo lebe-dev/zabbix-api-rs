@@ -494,9 +494,7 @@ pub trait ZabbixApiClient {
     /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
     /// use zabbix_api::host::create::CreateHostRequest;
     /// use zabbix_api::hostgroup::model::ZabbixHostGroupId; // For specifying group
-    /// // To use the example for interfaces in the line below (currently vec![]),
-    /// // you would uncomment this import:
-    /// // use zabbix_api::host::model::ZabbixHostInterface;
+    /// use zabbix_api::host::model::ZabbixHostInterface;
     /// // Other optional fields in CreateHostRequest might need these:
     /// // use zabbix_api::host::model::ZabbixHostTag;
     /// // use zabbix_api::template::model::ZabbixTemplate;
@@ -518,7 +516,7 @@ pub trait ZabbixApiClient {
     /// let create_host_params = CreateHostRequest {
     ///     host: new_host_name.clone(),
     ///     groups: vec![ZabbixHostGroupId { group_id: known_host_group_id.to_string() }],
-    ///     interfaces: vec![], // Add interfaces: e.g., ZabbixHostInterface { r#type: 1, main: 1, use_ip: 1, ip: "127.0.0.1".to_string(), dns: "".to_string() }
+    ///     interfaces: vec![ZabbixHostInterface { r#type: 1, main: 1, use_ip: 1, ip: "127.0.0.1".to_string(), dns: "".to_string(), port: "10050".to_string() }],
     ///     tags: vec![],
     ///     templates: vec![],
     ///     macros: vec![],
