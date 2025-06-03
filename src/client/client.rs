@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use log::debug;
 use log::error;
-use log::info;
 use reqwest::blocking::Client;
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -944,7 +943,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(api_version) => {
-                        info!("zabbix api version: '{api_version}'");
+                        debug!("zabbix api version: '{api_version}'");
                         Ok(api_version)
                     }
                     None => match response.error {
@@ -965,7 +964,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     }
 
     fn get_auth_session(&self, login: &str, token: &str) -> Result<String, ZabbixApiError> {
-        info!("getting auth session for user '{login}'..");
+        debug!("getting auth session for user '{login}'..");
 
         let params = HashMap::from([
             ("username".to_string(), login.to_string()),
@@ -980,7 +979,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(session) => {
-                        info!("auth ok");
+                        debug!("auth ok");
                         Ok(session)
                     }
                     None => match response.error {
@@ -1006,7 +1005,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         method: &str,
         params: &P,
     ) -> Result<ZabbixApiResponse<R>, ZabbixApiError> {
-        info!("calling api method '{method}'..");
+        debug!("calling api method '{method}'..");
 
         let api_request = get_api_request(method, params, Some(session.to_string()));
 
@@ -1025,7 +1024,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(_) => {
-                        info!("api method '{method}' has been successfully called");
+                        debug!("api method '{method}' has been successfully called");
                         Ok(response)
                     }
                     None => match response.error {
@@ -1056,7 +1055,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixHostGroup>, ZabbixApiError> {
-        info!("getting host groups with params");
+        debug!("getting host groups with params");
 
         let api_request = get_api_request("hostgroup.get", params, Some(session.to_string()));
 
@@ -1077,7 +1076,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("host groups found: {:?}", results);
+                        debug!("host groups found: {:?}", results);
                         Ok(results)
                     }
                     None => match response.error {
@@ -1108,7 +1107,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixHost>, ZabbixApiError> {
-        info!("getting hosts with params");
+        debug!("getting hosts with params");
 
         let api_request = get_api_request("host.get", params, Some(session.to_string()));
 
@@ -1128,7 +1127,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("hosts found: {:?}", results);
+                        debug!("hosts found: {:?}", results);
                         Ok(results)
                     }
                     None => match response.error {
@@ -1159,7 +1158,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixItem>, ZabbixApiError> {
-        info!("getting items with params");
+        debug!("getting items with params");
 
         let api_request = get_api_request("item.get", params, Some(session.to_string()));
 
@@ -1179,7 +1178,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("hosts found: {:?}", results);
+                        debug!("hosts found: {:?}", results);
                         Ok(results)
                     }
                     None => match response.error {
@@ -1210,7 +1209,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixTrigger>, ZabbixApiError> {
-        info!("getting triggers..");
+        debug!("getting triggers..");
 
         let api_request = get_api_request("trigger.get", params, Some(session.to_string()));
 
@@ -1230,7 +1229,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("hosts found: {:?}", results);
+                        debug!("hosts found: {:?}", results);
                         Ok(results)
                     }
                     None => match response.error {
@@ -1261,7 +1260,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixWebScenario>, ZabbixApiError> {
-        info!("getting web-scenarios..");
+        debug!("getting web-scenarios..");
 
         let api_request = get_api_request("httptest.get", params, Some(session.to_string()));
 
@@ -1282,7 +1281,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("hosts found: {:?}", results);
+                        debug!("hosts found: {:?}", results);
                         Ok(results)
                     }
                     None => match response.error {
@@ -1315,7 +1314,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
     ) -> Result<u32, ZabbixApiError> {
         use crate::hostgroup::create::CreateHostGroupResponse;
 
-        info!("creating host group '{}'..", request.name);
+        debug!("creating host group '{}'..", request.name);
 
         let api_request = get_api_request("hostgroup.create", request, Some(session.to_string()));
 
@@ -1336,7 +1335,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("host group '{}' has been created", request.name);
+                        debug!("host group '{}' has been created", request.name);
 
                         match result.group_ids.first() {
                             Some(id) => id.parse::<u32>().map_err(|_| ZabbixApiError::Error),
@@ -1374,7 +1373,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &CreateHostRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!("creating host '{}'..", request.host);
+        debug!("creating host '{}'..", request.host);
 
         let api_request = get_api_request("host.create", request, Some(session.to_string()));
 
@@ -1394,7 +1393,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("host '{}' has been created", request.host);
+                        debug!("host '{}' has been created", request.host);
 
                         match result.host_ids.first() {
                             Some(host_id) => {
@@ -1434,7 +1433,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &UpdateHostRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!("updating host '{:?}'..", &serde_json::to_string(request));
+        debug!("updating host '{:?}'..", &serde_json::to_string(request));
 
         let api_request = get_api_request("host.update", request, Some(session.to_string()));
 
@@ -1454,7 +1453,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("host '{}' has been updated", request.hostid);
+                        debug!("host '{}' has been updated", request.hostid);
 
                         match result.host_ids.first() {
                             Some(host_id) => {
@@ -1494,7 +1493,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         host_ids: &Vec<String>,
     ) -> Result<Vec<String>, ZabbixApiError> {
-        info!("deleting hosts '{:?}'..", &serde_json::to_string(host_ids));
+        debug!("deleting hosts '{:?}'..", &serde_json::to_string(host_ids));
 
         let api_request = get_api_request("host.delete", host_ids, Some(session.to_string()));
 
@@ -1546,7 +1545,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &CreateItemRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!(
+        debug!(
             "creating item with key '{}' for host id {}..",
             request.key_, request.host_id
         );
@@ -1569,7 +1568,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("item '{}' has been created", request.key_);
+                        debug!("item '{}' has been created", request.key_);
 
                         match result.item_ids.first() {
                             Some(host_id) => {
@@ -1609,7 +1608,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &CreateTriggerRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!(
+        debug!(
             "creating trigger '{}' with expression '{}'..",
             request.description, request.expression
         );
@@ -1633,7 +1632,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("trigger '{}' has been created", request.description);
+                        debug!("trigger '{}' has been created", request.description);
 
                         match result.trigger_ids.first() {
                             Some(host_id) => {
@@ -1673,7 +1672,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &CreateWebScenarioRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!(
+        debug!(
             "creating web-scenario '{}' for host id '{}'..",
             request.name, request.host_id
         );
@@ -1697,7 +1696,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("web-scenario '{}' has been created", request.name);
+                        debug!("web-scenario '{}' has been created", request.name);
 
                         match result.http_test_ids.first() {
                             Some(host_id) => {
@@ -1732,7 +1731,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixUser>, ZabbixApiError> {
-        info!("getting users..");
+        debug!("getting users..");
 
         let api_request = get_api_request("user.get", params, Some(session.to_string()));
 
@@ -1752,7 +1751,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("users found: {:?}", results.len());
+                        debug!("users found: {:?}", results.len());
                         Ok(results)
                     }
                     None => match response.error {
@@ -1782,7 +1781,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &CreateUserGroupRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!("creating user group '{}'..", request.name);
+        debug!("creating user group '{}'..", request.name);
 
         let api_request = get_api_request("usergroup.create", request, Some(session.to_string()));
 
@@ -1803,7 +1802,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("user group '{}' has been created", request.name);
+                        debug!("user group '{}' has been created", request.name);
 
                         match result.user_group_ids.first() {
                             Some(id) => id.parse::<u32>().map_err(|_| ZabbixApiError::Error),
@@ -1835,7 +1834,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         params: &P,
     ) -> Result<Vec<ZabbixUserGroup>, ZabbixApiError> {
-        info!("getting user groups..");
+        debug!("getting user groups..");
 
         let api_request = get_api_request("usergroup.get", params, Some(session.to_string()));
 
@@ -1856,7 +1855,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(results) => {
-                        info!("user groups found: {:?}", results.len());
+                        debug!("user groups found: {:?}", results.len());
                         Ok(results)
                     }
                     None => match response.error {
@@ -1881,7 +1880,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
         session: &str,
         request: &CreateUserRequest,
     ) -> Result<u32, ZabbixApiError> {
-        info!("creating user '{}'..", request.username);
+        debug!("creating user '{}'..", request.username);
 
         let params = [request];
         let api_request = get_api_request("user.create", &params, Some(session.to_string()));
@@ -1902,7 +1901,7 @@ impl ZabbixApiClient for ZabbixApiClientImpl {
 
                 match response.result {
                     Some(result) => {
-                        info!("user '{}' has been created", request.username);
+                        debug!("user '{}' has been created", request.username);
 
                         match result.user_ids.first() {
                             Some(id) => id.parse::<u32>().map_err(|_| ZabbixApiError::Error),
