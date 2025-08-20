@@ -1,6 +1,6 @@
 [package]
 name = "zabbix-api"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Eugene Lebedev <eugene.0x90@gmail.com>"]
 edition = "2021"
 description = "Zabbix API client"
