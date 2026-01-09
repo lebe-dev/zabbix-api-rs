@@ -16,8 +16,8 @@ pub struct UserGroupPermission {
     pub permission: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 #[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ZabbixUserGroup {
     #[serde(rename = "usrgrpid")]
     pub usrgrp_id: String,
@@ -51,8 +51,8 @@ pub struct UserGroupUser {
 
 /// Parameters for the `usergroup.create` API method.
 /// See: https://www.zabbix.com/documentation/current/en/manual/api/reference/usergroup/create
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CreateUserGroupRequest {
     /// Name of the user group.
     pub name: String,
@@ -60,7 +60,7 @@ pub struct CreateUserGroupRequest {
     /// (optional) Whether debug mode is enabled or disabled.
     /// 0 - (default) disabled;
     /// 1 - enabled.
-    pub debug_mode: Option<i32>,
+    pub debug_mode: i32,
 
     /// (optional) Frontend authentication method of the users in the group.
     /// 0 - (default) use the system default authentication method;

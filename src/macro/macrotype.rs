@@ -1,10 +1,12 @@
-use serde_repr::{Deserialize_repr, Serialize_repr};
+use serde::{Deserialize, Serialize};
 
-#[derive(Default, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
+#[derive(Default, Debug, Deserialize, Serialize)]
 pub enum MacroType {
     #[default]
-    Text = 0,
-    Secret = 1,
-    Vault = 2,
+    #[serde(rename = "0")]
+    Text,
+    #[serde(rename = "1")]
+    Secret,
+    #[serde(rename = "2")]
+    Vault,
 }

@@ -1,8 +1,8 @@
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-#[derive(Serialize, Debug, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Default)]
 pub struct GetUserGroupsRequest<F: Serialize> {
     pub output: Option<String>,
     pub filter: Option<F>,
@@ -15,8 +15,8 @@ pub struct GetUserGroupsRequest<F: Serialize> {
     pub select_rights: Option<String>,
 }
 
-#[derive(Serialize, Debug, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Default)]
 pub struct UserGroupFilter {
     pub name: Option<Vec<String>>,
 }

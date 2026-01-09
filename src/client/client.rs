@@ -492,9 +492,9 @@ pub trait ZabbixApiClient {
     /// use std::collections::HashMap;
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
-    /// use zabbix_api::host::create::CreateHostRequest;
+    /// use zabbix_api::host::create::{CreateHostRequest, InventoryMode};
     /// use zabbix_api::hostgroup::model::ZabbixHostGroupId; // For specifying group
-    /// use zabbix_api::host::model::ZabbixHostInterface;
+    /// use zabbix_api::host::model::{ZabbixHostInterface, ZabbixHostInventory};
     /// // Other optional fields in CreateHostRequest might need these:
     /// // use zabbix_api::host::model::ZabbixHostTag;
     /// // use zabbix_api::template::model::ZabbixTemplate;
@@ -520,8 +520,8 @@ pub trait ZabbixApiClient {
     ///     tags: vec![],
     ///     templates: vec![],
     ///     macros: vec![],
-    ///     inventory_mode: 0, // 0: disabled, 1: automatic, -1: manual
-    ///     inventory: HashMap::new(),
+    ///     inventory_mode: InventoryMode::Manual, // 0: disabled, 1: automatic, -1: manual
+    ///     inventory: ZabbixHostInventory::default(),
     ///     ..Default::default()
     /// };
     ///
@@ -800,7 +800,7 @@ pub trait ZabbixApiClient {
     ///     users: Some(vec![UserGroupUser {
     ///         user_id: "1".to_string(), // User ID to add to the group
     ///     }]),
-    ///     debug_mode: None,
+    ///     debug_mode: 0,
     ///     templategroup_rights: None, // Added missing field
     ///     tag_filters: None,
     /// };

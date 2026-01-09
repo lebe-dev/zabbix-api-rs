@@ -2,14 +2,13 @@ use super::model::{ZabbixHostInterface, ZabbixHostInventory, ZabbixHostTag};
 use crate::r#macro::create::CreateZabbixHostMacro;
 use crate::{hostgroup::model::ZabbixHostGroupId, template::model::ZabbixTemplateId};
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::skip_serializing_none;
 
 const PSK: u8 = 2;
 const CERT: u8 = 4;
 
-#[derive(Serialize, Debug)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug)]
 pub struct TlsConfig {
     tls_connect: u8,
     tls_accept: u8,
@@ -44,8 +43,8 @@ impl TlsConfig {
 }
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/create
-#[derive(Serialize, Debug, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Default)]
 pub struct CreateHostRequest {
     pub host: String,
     pub name: Option<String>,
@@ -60,13 +59,15 @@ pub struct CreateHostRequest {
     pub tls_config: Option<TlsConfig>,
 }
 
-#[derive(Debug, Clone, Copy, Default, Deserialize_repr, Serialize_repr)]
-#[repr(i8)]
+#[derive(Debug, Clone, Copy, Default, Deserialize, Serialize)]
 pub enum InventoryMode {
     #[default]
-    Disabled = -1,
-    Manual = 0,
-    Automatic = 1,
+    #[serde(rename = "-1")]
+    Disabled,
+    #[serde(rename = "0")]
+    Manual,
+    #[serde(rename = "1")]
+    Automatic,
 }
 
 impl CreateHostRequest {

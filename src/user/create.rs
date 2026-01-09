@@ -6,8 +6,8 @@ pub struct UserGroupId {
     pub usrgrpid: String,
 }
 
-#[derive(Serialize, Debug, Clone, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Clone, Default)]
 pub struct UserMedia {
     pub mediatypeid: String,
     pub sendto: String,
@@ -16,8 +16,8 @@ pub struct UserMedia {
     pub period: Option<String>,
 }
 
-#[derive(Serialize, Debug, Clone, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Clone, Default)]
 pub struct CreateUserRequest {
     pub username: String,
     pub passwd: String,

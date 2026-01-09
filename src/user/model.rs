@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ZabbixUser {
     #[serde(rename = "userid")]
     pub user_id: String,

@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use std::cmp::PartialEq;
 use std::str::FromStr;
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
-#[derive(Clone, Debug, PartialEq, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum HostStatus {
-    Enabled = 0,
-    Disabled = 1,
+    #[serde(rename = "0")]
+    Enabled,
+    #[serde(rename = "1")]
+    Disabled,
 }
 
 impl FromStr for HostStatus {
@@ -52,8 +52,8 @@ pub struct ZabbixHostInterface {
 }
 
 /// API Object: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/host/object#host-inventory
-#[derive(Serialize, Deserialize, PartialEq, Clone, Debug, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug, Default)]
 pub struct ZabbixHostInventory {
     #[serde(rename = "type")]
     pub r#type: Option<String>,

@@ -2,8 +2,8 @@ use crate::r#macro::macrotype::MacroType;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-#[derive(Serialize, Debug, Default)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Default)]
 pub struct CreateZabbixHostMacro {
     #[serde(rename = "macro")]
     pub macro_name: String,

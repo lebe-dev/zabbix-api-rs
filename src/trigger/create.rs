@@ -3,8 +3,8 @@ use serde_with::skip_serializing_none;
 
 use super::model::ZabbixTriggerTag;
 
-#[derive(Serialize, Debug, Clone)]
 #[skip_serializing_none]
+#[derive(Serialize, Debug, Clone)]
 pub struct CreateTriggerRequest {
     pub description: String,
     pub expression: String,
