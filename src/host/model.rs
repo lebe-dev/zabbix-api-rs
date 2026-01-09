@@ -1,36 +1,14 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use std::cmp::PartialEq;
 use std::str::FromStr;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum HostStatus {
-    Enabled,
-    Disabled,
-}
-
-impl Serialize for HostStatus {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let value = match self {
-            HostStatus::Enabled => "0",
-            HostStatus::Disabled => "1",
-        };
-
-        serializer.serialize_str(value)
-    }
-}
-
-impl<'de> Deserialize<'de> for HostStatus {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let value = String::deserialize(deserializer)?;
-
-        HostStatus::from_str(&value).map_err(|_| serde::de::Error::custom(format!("Invalid HostStatus value: {}", value)))
-    }
+    Enabled = 0,
+    Disabled = 1,
 }
 
 impl FromStr for HostStatus {
