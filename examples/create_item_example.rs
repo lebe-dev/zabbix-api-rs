@@ -15,12 +15,13 @@ fn generate_unique_item_key() -> String {
 }
 
 fn main() -> Result<(), ZabbixApiError> {
-    let zabbix_api_url =
-        env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL environment variable not set (e.g., http://localhost:3080/api_jsonrpc.php)");
-    let zabbix_api_user =
-        env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER environment variable not set (e.g., Admin)");
-    let zabbix_api_password =
-        env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD environment variable not set (e.g., zabbix)");
+    let zabbix_api_url = env::var("ZABBIX_API_URL").expect(
+        "ZABBIX_API_URL environment variable not set (e.g., http://localhost:3080/api_jsonrpc.php)",
+    );
+    let zabbix_api_user = env::var("ZABBIX_API_USER")
+        .expect("ZABBIX_API_USER environment variable not set (e.g., Admin)");
+    let zabbix_api_password = env::var("ZABBIX_API_PASSWORD")
+        .expect("ZABBIX_API_PASSWORD environment variable not set (e.g., zabbix)");
 
     // IMPORTANT: Replace with a valid host ID from your Zabbix instance
     let host_id_for_item = env::var("ZABBIX_HOST_ID_FOR_ITEM_EXAMPLE")
@@ -42,12 +43,12 @@ fn main() -> Result<(), ZabbixApiError> {
         name: item_name.clone(),
         key_: item_key.clone(),
         host_id: host_id_for_item.clone(),
-        r#type: 0, // Type 0: Zabbix agent. Adjust if using a different item type.
+        r#type: 0,     // Type 0: Zabbix agent. Adjust if using a different item type.
         value_type: 3, // Type 3: Numeric (unsigned). Adjust for other data types (e.g., 4 for Text).
         interface_id: "0".to_string(), // Use "0" for the first available agent interface, or provide a specific interface ID.
-        delay: "1m".to_string(), // Collect data every 1 minute.
+        delay: "1m".to_string(),       // Collect data every 1 minute.
         tags: Vec::<ZabbixHostTag>::new(), // Optional: Add item tags if needed. Made type explicit.
-        // Add other optional fields as necessary
+                                       // Add other optional fields as necessary
     };
 
     println!(
@@ -63,10 +64,7 @@ fn main() -> Result<(), ZabbixApiError> {
             );
         }
         Err(e) => {
-            eprintln!(
-                "Error creating item '{}': {}",
-                item_name, e
-            );
+            eprintln!("Error creating item '{}': {}", item_name, e);
             return Err(e);
         }
     }

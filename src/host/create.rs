@@ -1,7 +1,7 @@
 use super::model::{ZabbixHostInterface, ZabbixHostInventory, ZabbixHostTag};
 use crate::r#macro::create::CreateZabbixHostMacro;
 use crate::{hostgroup::model::ZabbixHostGroupId, template::model::ZabbixTemplateId};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::skip_serializing_none;
 

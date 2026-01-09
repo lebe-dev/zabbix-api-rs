@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct UserGroupId {
@@ -6,41 +7,33 @@ pub struct UserGroupId {
 }
 
 #[derive(Serialize, Debug, Clone, Default)]
+#[skip_serializing_none]
 pub struct UserMedia {
     pub mediatypeid: String,
     pub sendto: String,
     pub active: i32,
     pub severity: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub period: Option<String>,
 }
 
 #[derive(Serialize, Debug, Clone, Default)]
+#[skip_serializing_none]
 pub struct CreateUserRequest {
     pub username: String,
     pub passwd: String,
     pub roleid: String,
     pub usrgrps: Vec<UserGroupId>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub surname: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub autologin: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub autologout: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub refresh: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub theme: Option<String>,
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
     pub user_type: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_medias: Option<Vec<UserMedia>>,
 }
 

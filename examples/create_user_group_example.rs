@@ -38,10 +38,7 @@ fn main() -> Result<(), ZabbixApiError> {
         ..Default::default() // If your struct derives Default and has more fields
     };
 
-    println!(
-        "Attempting to create user group '{}'...",
-        user_group_name
-    );
+    println!("Attempting to create user group '{}'...", user_group_name);
 
     match client.create_user_group(&session, &create_request) {
         Ok(user_group_id) => {
@@ -51,10 +48,7 @@ fn main() -> Result<(), ZabbixApiError> {
             );
         }
         Err(e) => {
-            eprintln!(
-                "Error creating user group '{}': {}",
-                user_group_name, e
-            );
+            eprintln!("Error creating user group '{}': {}", user_group_name, e);
             return Err(e);
         }
     }

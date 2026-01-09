@@ -49,12 +49,12 @@ fn main() -> Result<(), ZabbixApiError> {
     // 2. Prepare request to create a user
     let user_alias = generate_unique_name("example_user");
     let user_password = "Password123!"; // Example password
-    // Role ID "3" is often "Admin role" or "User role" depending on Zabbix version/customization.
-    // In this project's tests, "3" is referred to as "User role".
-    // Standard Zabbix: Guest=1, User=2, Admin=3, Super Admin=4.
-    // Using "3" to align with existing test conventions if they imply a specific setup.
-    // For a generic "User role", "2" might be more standard.
-    // Let's use "2" for "User role" as it's more standard for a general example.
+                                        // Role ID "3" is often "Admin role" or "User role" depending on Zabbix version/customization.
+                                        // In this project's tests, "3" is referred to as "User role".
+                                        // Standard Zabbix: Guest=1, User=2, Admin=3, Super Admin=4.
+                                        // Using "3" to align with existing test conventions if they imply a specific setup.
+                                        // For a generic "User role", "2" might be more standard.
+                                        // Let's use "2" for "User role" as it's more standard for a general example.
     let role_id = "2"; // User role
 
     let create_user_request = CreateUserRequest {
