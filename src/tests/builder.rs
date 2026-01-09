@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
-use crate::host::create::TlsConfig;
+use crate::host::create::{InventoryMode, TlsConfig};
 use crate::host::update::UpdateHostRequest;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroupId;
@@ -11,7 +11,7 @@ use log::{debug, error};
 use reqwest::blocking::Client;
 
 use crate::host::create::CreateHostRequest;
-use crate::host::model::ZabbixHostInterface;
+use crate::host::model::{ZabbixHostInterface, ZabbixHostInventory};
 use crate::item::create::CreateItemRequest;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
@@ -101,8 +101,8 @@ impl TestEnvBuilder {
             tags: vec![],
             templates: vec![],
             macros: vec![],
-            inventory_mode: 0,
-            inventory: HashMap::new(),
+            inventory_mode: InventoryMode::Manual,
+            inventory: ZabbixHostInventory::default(),
             tls_config: tls_config,
             ..Default::default()
         };

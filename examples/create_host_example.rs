@@ -1,9 +1,9 @@
 use reqwest::blocking::Client;
-use std::collections::HashMap;
 // std::env is no longer needed as credentials will be hardcoded.
 use zabbix_api::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
 use zabbix_api::error::ZabbixApiError;
-use zabbix_api::host::create::CreateHostRequest;
+use zabbix_api::host::create::{CreateHostRequest, InventoryMode};
+use zabbix_api::host::model::ZabbixHostInventory;
 // ZabbixHostInterface is no longer used in this example since interfaces are empty.
 use zabbix_api::hostgroup::create::CreateHostGroupRequest;
 use zabbix_api::hostgroup::model::ZabbixHostGroupId;
@@ -65,11 +65,11 @@ fn main() -> Result<(), ZabbixApiError> {
         // interfaces: vec![ZabbixHostInterface {
         //     r#type: 1, main: 1, ip: "127.0.0.1".to_string(), dns: "".to_string(), useip: 1, port: "10050".to_string(),
         // }],
-        tags: vec![],      // Optional: Add host tags if needed
-        templates: vec![], // Optional: Link templates if needed
-        macros: vec![],    // Optional: Add host macros if needed
-        inventory_mode: 0, // Optional: Inventory mode (0 for disabled)
-        inventory: HashMap::new(), // Optional: Host inventory
+        tags: vec![],                              // Optional: Add host tags if needed
+        templates: vec![],                         // Optional: Link templates if needed
+        macros: vec![],                            // Optional: Add host macros if needed
+        inventory_mode: InventoryMode::Manual,     // Optional: Inventory mode (0 for disabled)
+        inventory: ZabbixHostInventory::default(), // Optional: Host inventory
         ..Default::default() // Instead of all the vec![] above, you can just replace by default()
     };
 
