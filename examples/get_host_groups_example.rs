@@ -9,16 +9,17 @@ use zabbix_api::hostgroup::get::GetHostGroupsRequest; // Use the actual request 
 #[derive(Serialize)]
 struct HostGroupFilter {
     name: Vec<String>, // Example: filter by a list of names
-    // Add other filter fields as needed, e.g., hostids, groupids
+                       // Add other filter fields as needed, e.g., hostids, groupids
 }
 
 fn main() -> Result<(), ZabbixApiError> {
-    let zabbix_api_url =
-        env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL environment variable not set (e.g., http://localhost:3080/api_jsonrpc.php)");
-    let zabbix_api_user =
-        env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER environment variable not set (e.g., Admin)");
-    let zabbix_api_password =
-        env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD environment variable not set (e.g., zabbix)");
+    let zabbix_api_url = env::var("ZABBIX_API_URL").expect(
+        "ZABBIX_API_URL environment variable not set (e.g., http://localhost:3080/api_jsonrpc.php)",
+    );
+    let zabbix_api_user = env::var("ZABBIX_API_USER")
+        .expect("ZABBIX_API_USER environment variable not set (e.g., Admin)");
+    let zabbix_api_password = env::var("ZABBIX_API_PASSWORD")
+        .expect("ZABBIX_API_PASSWORD environment variable not set (e.g., zabbix)");
 
     let http_client = Client::new();
     let client = ZabbixApiClientImpl::new(http_client, &zabbix_api_url);
@@ -41,16 +42,25 @@ fn main() -> Result<(), ZabbixApiError> {
         // selectApplications: "extend", // To get applications in the group
     };
 
-    println!("Attempting to fetch host groups with names: {:?}", group_names_to_filter);
+    println!(
+        "Attempting to fetch host groups with names: {:?}",
+        group_names_to_filter
+    );
 
     match client.get_host_groups(&session, &request_params) {
         Ok(host_groups) => {
             if host_groups.is_empty() {
-                println!("No host groups found matching the criteria: {:?}.", group_names_to_filter);
+                println!(
+                    "No host groups found matching the criteria: {:?}.",
+                    group_names_to_filter
+                );
             } else {
                 println!("Successfully fetched {} host group(s):", host_groups.len());
                 for group in host_groups {
-                    println!("  Group ID: {}, Group Name: '{}'", group.group_id, group.name);
+                    println!(
+                        "  Group ID: {}, Group Name: '{}'",
+                        group.group_id, group.name
+                    );
                     // If selectHosts was used, you could iterate group.hosts and print host details
                 }
             }

@@ -61,10 +61,7 @@ fn main() -> Result<(), ZabbixApiError> {
 
     let host_id = match client.create_host(&session, &create_host_request) {
         Ok(id) => {
-            println!(
-                "Successfully created host '{}' with ID: {}",
-                host_name, id
-            );
+            println!("Successfully created host '{}' with ID: {}", host_name, id);
             id.to_string()
         }
         Err(e) => {

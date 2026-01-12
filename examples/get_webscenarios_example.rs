@@ -26,12 +26,13 @@ fn main() -> Result<(), ZabbixApiError> {
     // For this example, we'll assume logging is initialized if needed elsewhere or skip for simplicity.
     // env_logger::init();
 
-    let zabbix_api_url =
-        env::var("ZABBIX_API_URL").expect("ZABBIX_API_URL environment variable not set (e.g., http://localhost:3080/api_jsonrpc.php)");
-    let zabbix_api_user =
-        env::var("ZABBIX_API_USER").expect("ZABBIX_API_USER environment variable not set (e.g., Admin)");
-    let zabbix_api_password =
-        env::var("ZABBIX_API_PASSWORD").expect("ZABBIX_API_PASSWORD environment variable not set (e.g., zabbix)");
+    let zabbix_api_url = env::var("ZABBIX_API_URL").expect(
+        "ZABBIX_API_URL environment variable not set (e.g., http://localhost:3080/api_jsonrpc.php)",
+    );
+    let zabbix_api_user = env::var("ZABBIX_API_USER")
+        .expect("ZABBIX_API_USER environment variable not set (e.g., Admin)");
+    let zabbix_api_password = env::var("ZABBIX_API_PASSWORD")
+        .expect("ZABBIX_API_PASSWORD environment variable not set (e.g., zabbix)");
 
     let http_client = Client::new();
     let client = ZabbixApiClientImpl::new(http_client, &zabbix_api_url);
@@ -54,7 +55,10 @@ fn main() -> Result<(), ZabbixApiError> {
             if webscenarios.is_empty() {
                 println!("No web scenarios found matching the criteria.");
             } else {
-                println!("Successfully fetched {} web scenario(s):", webscenarios.len());
+                println!(
+                    "Successfully fetched {} web scenario(s):",
+                    webscenarios.len()
+                );
                 for scenario in webscenarios {
                     println!(
                         "\n  Scenario Name: '{}', Host ID: {}",

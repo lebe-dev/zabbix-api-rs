@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::host::model::HostStatus;
+use serde::{Deserialize, Serialize};
 
 /// Represents a host update request in Zabbix API
 #[derive(Debug, Serialize)]

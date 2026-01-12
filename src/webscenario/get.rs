@@ -3,7 +3,7 @@ use serde::Serialize;
 use crate::ZABBIX_EXTEND_PROPERTY_VALUE;
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/httptest/get
-#[derive(Serialize,Debug)]
+#[derive(Serialize, Debug)]
 pub struct GetWebScenarioByIdRequest {
     pub output: String,
 
@@ -15,7 +15,7 @@ pub struct GetWebScenarioByIdRequest {
 }
 
 /// API: https://www.zabbix.com/documentation/6.0/en/manual/api/reference/httptest/get
-#[derive(Serialize,Debug)]
+#[derive(Serialize, Debug)]
 pub struct GetWebScenarioByNameRequest {
     pub output: String,
 
@@ -37,7 +37,7 @@ impl GetWebScenarioByNameRequest {
     }
 }
 
-#[derive(Serialize,Debug)]
+#[derive(Serialize, Debug)]
 pub struct WebScenarioNameFilter {
-    pub name: String
+    pub name: String,
 }

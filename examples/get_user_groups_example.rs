@@ -28,7 +28,7 @@ fn main() -> Result<(), ZabbixApiError> {
     let request_params = GetUserGroupsRequest {
         output: Some("extend".to_string()),
         select_users: Some("extend".to_string()), // To get users in the group
-        filter: Option::<UserGroupFilter>::None, // No filter, get all groups
+        filter: Option::<UserGroupFilter>::None,  // No filter, get all groups
         // You can add other parameters like:
         // status: Some(0), // To get enabled groups
         // select_rights: Some("extend"), // To get group rights
@@ -57,7 +57,10 @@ fn main() -> Result<(), ZabbixApiError> {
                         } else {
                             println!("    Users ({}):", users.len());
                             for user in users {
-                                println!("      - User ID: {}, Alias: '{}'", user.user_id, user.alias);
+                                println!(
+                                    "      - User ID: {}, Alias: '{}'",
+                                    user.user_id, user.alias
+                                );
                             }
                         }
                     }

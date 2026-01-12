@@ -15,29 +15,31 @@ pub enum ZabbixApiError {
     #[error("zabbix api call error")]
     ApiCallError {
         #[source]
-        zabbix: ZabbixError
+        zabbix: ZabbixError,
     },
 
     #[error("zabbix api bad request error")]
     BadRequestError,
 
     #[error("zabbix api error")]
-    Error
+    Error,
 }
 
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize, Debug)]
 pub struct ZabbixError {
     pub code: i32,
     pub message: String,
-    pub data: String
+    pub data: String,
 }
 
 impl Display for ZabbixError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[zabbix error] code {}, message '{}', data: '{}' [/zabbix error]", self.code, self.message, self.data)
+        write!(
+            f,
+            "[zabbix error] code {}, message '{}', data: '{}' [/zabbix error]",
+            self.code, self.message, self.data
+        )
     }
 }
 
-impl StdError for ZabbixError {
-
-}
+impl StdError for ZabbixError {}

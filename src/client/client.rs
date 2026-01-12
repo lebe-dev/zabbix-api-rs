@@ -492,9 +492,9 @@ pub trait ZabbixApiClient {
     /// use std::collections::HashMap;
     /// use reqwest::blocking::Client;
     /// use zabbix_api::client::client::{ZabbixApiClientImpl, ZabbixApiClient};
-    /// use zabbix_api::host::create::CreateHostRequest;
+    /// use zabbix_api::host::create::{CreateHostRequest, InventoryMode};
     /// use zabbix_api::hostgroup::model::ZabbixHostGroupId; // For specifying group
-    /// use zabbix_api::host::model::ZabbixHostInterface;
+    /// use zabbix_api::host::model::{ZabbixHostInterface, ZabbixHostInventory};
     /// // Other optional fields in CreateHostRequest might need these:
     /// // use zabbix_api::host::model::ZabbixHostTag;
     /// // use zabbix_api::template::model::ZabbixTemplate;
@@ -520,8 +520,8 @@ pub trait ZabbixApiClient {
     ///     tags: vec![],
     ///     templates: vec![],
     ///     macros: vec![],
-    ///     inventory_mode: 0, // 0: disabled, 1: automatic, -1: manual
-    ///     inventory: HashMap::new(),
+    ///     inventory_mode: InventoryMode::Manual, // 0: disabled, 1: automatic, -1: manual
+    ///     inventory: ZabbixHostInventory::default(),
     ///     ..Default::default()
     /// };
     ///
@@ -800,7 +800,7 @@ pub trait ZabbixApiClient {
     ///     users: Some(vec![UserGroupUser {
     ///         user_id: "1".to_string(), // User ID to add to the group
     ///     }]),
-    ///     debug_mode: None,
+    ///     debug_mode: 0,
     ///     templategroup_rights: None, // Added missing field
     ///     tag_filters: None,
     /// };
@@ -2132,18 +2132,18 @@ mod tests {
     use serde::Serialize;
 
     use crate::client::client::ZabbixApiClient;
+    use crate::host::create::TlsConfig;
     use crate::host::get::GetHostsRequest;
     use crate::host::model::ZabbixHost;
+    use crate::host::update::UpdateHostRequest;
     use crate::hostgroup::get::GetHostGroupsRequest;
     use crate::item::create::CreateItemRequest;
     use crate::item::get::GetItemsRequestById;
-    use crate::host::create::TlsConfig;
-    use crate::host::update::UpdateHostRequest;
     use crate::tests::builder::TestEnvBuilder;
     use crate::tests::integration::{are_integration_tests_enabled, get_integration_tests_config};
     use crate::tests::logging::init_logging;
-    use crate::tests::strings::get_random_string;
     use crate::tests::strings::get_random_hex_string;
+    use crate::tests::strings::get_random_string;
     use crate::trigger::create::CreateTriggerRequest;
     use crate::trigger::get::GetTriggerByIdRequest;
     use crate::usergroup::model::{CreateUserGroupRequest, UserGroupPermission, UserGroupUser};
@@ -2361,17 +2361,25 @@ mod tests {
                 .create_host(&host_name2, None)
                 .create_host(&host_name3, None);
 
-            match test_env.client.get_hosts(&test_env.session, &GetHostsRequest { filter: HostFilter { host: vec![host_name1, host_name2, host_name3] } }) {
+            match test_env.client.get_hosts(
+                &test_env.session,
+                &GetHostsRequest {
+                    filter: HostFilter {
+                        host: vec![host_name1, host_name2, host_name3],
+                    },
+                },
+            ) {
                 Ok(hosts) => {
-                    let host_ids = hosts.iter().map(|host| host.host_id.clone()).collect::<Vec<String>>();
+                    let host_ids = hosts
+                        .iter()
+                        .map(|host| host.host_id.clone())
+                        .collect::<Vec<String>>();
 
                     test_env.get_session().delete_hosts(&host_ids);
 
                     match test_env.client.get_hosts(
                         &test_env.session,
-                        &GetHostsByIdsRequest {
-                            hostids: host_ids,
-                        },
+                        &GetHostsByIdsRequest { hostids: host_ids },
                     ) {
                         Ok(hosts) => {
                             assert!(hosts.is_empty());
@@ -2589,7 +2597,13 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name, Some(TlsConfig::new_cert("CN=some issuer".to_string(), "CN=some subject".to_string())));
+                .create_host(
+                    &host_name,
+                    Some(TlsConfig::new_cert(
+                        "CN=some issuer".to_string(),
+                        "CN=some subject".to_string(),
+                    )),
+                );
 
             assert!(test_env.latest_host_group_id > 0);
             assert!(test_env.latest_host_id > 0);
@@ -2609,7 +2623,13 @@ mod tests {
             test_env
                 .get_session()
                 .create_host_group(&group_name)
-                .create_host(&host_name, Some(TlsConfig::new_psk(get_random_string(), get_random_hex_string())));
+                .create_host(
+                    &host_name,
+                    Some(TlsConfig::new_psk(
+                        get_random_string(),
+                        get_random_hex_string(),
+                    )),
+                );
 
             assert!(test_env.latest_host_group_id > 0);
             assert!(test_env.latest_host_id > 0);
@@ -2635,7 +2655,9 @@ mod tests {
             assert!(test_env.latest_host_id > 0);
 
             let host_id = test_env.latest_host_id.to_string();
-            test_env.get_session().update_host(UpdateHostRequest::disable_host(host_id));
+            test_env
+                .get_session()
+                .update_host(UpdateHostRequest::disable_host(host_id));
         }
     }
 

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::client::client::{ZabbixApiClient, ZabbixApiClientImpl};
-use crate::host::create::TlsConfig;
+use crate::host::create::{InventoryMode, TlsConfig};
 use crate::host::update::UpdateHostRequest;
 use crate::hostgroup::create::CreateHostGroupRequest;
 use crate::hostgroup::model::ZabbixHostGroupId;
@@ -11,7 +11,7 @@ use log::{debug, error};
 use reqwest::blocking::Client;
 
 use crate::host::create::CreateHostRequest;
-use crate::host::model::ZabbixHostInterface;
+use crate::host::model::{ZabbixHostInterface, ZabbixHostInventory};
 use crate::item::create::CreateItemRequest;
 use crate::tests::integration::{get_integration_tests_config, IntegrationTestsConfig};
 use crate::trigger::create::CreateTriggerRequest;
@@ -97,12 +97,19 @@ impl TestEnvBuilder {
             groups: vec![ZabbixHostGroupId {
                 group_id: self.latest_host_group_id.to_string(),
             }],
-            interfaces: vec![ZabbixHostInterface { r#type: 1, main: 1, use_ip: 1, ip: "127.0.0.1".to_string(), dns: "".to_string(), port: "10050".to_string() }],
+            interfaces: vec![ZabbixHostInterface {
+                r#type: 1,
+                main: 1,
+                use_ip: 1,
+                ip: "127.0.0.1".to_string(),
+                dns: "".to_string(),
+                port: "10050".to_string(),
+            }],
             tags: vec![],
             templates: vec![],
             macros: vec![],
-            inventory_mode: 0,
-            inventory: HashMap::new(),
+            inventory_mode: InventoryMode::Manual,
+            inventory: ZabbixHostInventory::default(),
             tls_config: tls_config,
             ..Default::default()
         };
@@ -128,9 +135,12 @@ impl TestEnvBuilder {
 
         match &self.client.update_host(&self.session, &update_host) {
             Ok(_) => {
-                match &self.client.get_hosts(&self.session, &GetHostsByIdsRequest {
-                    hostids: vec![update_host.hostid.clone()],
-                }) {
+                match &self.client.get_hosts(
+                    &self.session,
+                    &GetHostsByIdsRequest {
+                        hostids: vec![update_host.hostid.clone()],
+                    },
+                ) {
                     Ok(hosts) => {
                         if hosts.is_empty() {
                             error!("host update error: {}", "host not found");
@@ -139,7 +149,10 @@ impl TestEnvBuilder {
 
                         let host = hosts.first().unwrap();
 
-                        debug!("host: {:?}, update_host: {:?}", host.status, update_host.status);
+                        debug!(
+                            "host: {:?}, update_host: {:?}",
+                            host.status, update_host.status
+                        );
                         if host.status != update_host.status {
                             error!("host update error: {}", "host status not updated");
                             panic!("host status not updated");
